@@ -36,12 +36,15 @@ class App(ctk.CTk):
         self.password_text = ctk.CTkTextbox(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
         self.password_text.grid(row=2, column=1, sticky= "ew", pady=10, padx=10)
         #login button
-        self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit")
-        self.login_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10, command=self.login_submission(), columnspan=2)
+        self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit", command=self.login_submission)
+        self.login_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10, columnspan=2)
     def login_submission(self):
         print("Login counted")
+        self.save_to_file()
     def save_to_file(self):
-        
+        with open('subscribed_members.csv', "w") as file:
+            file_writer = csv.writer(file, delimiter=",", quotechar="|")
+            file_writer.writerow(["good"])
 
 if __name__ == "__main__":
     app = App()
