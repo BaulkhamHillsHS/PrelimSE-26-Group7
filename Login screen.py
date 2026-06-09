@@ -13,10 +13,7 @@ class App(ctk.CTk):
         self._build_ui()
         self.title("Login")
         #create username and password instances
-        #Get username that was typed in
-        self.username = self.username_text.get("0.0", "end")
-        #Get username that was typed in
-        self.password = self.password_text.get("0.0", "end")
+        self._profile_page = None
     def _build_ui(self):
         #giving different weights to different columns
         self.grid_columnconfigure((0), weight=1)
@@ -52,11 +49,11 @@ class App(ctk.CTk):
         #Check if the login details are correct
         verification = self.verify_login(self.username.strip(), self.password.strip())
         if verification == True:
-            print("Good Job")
-            self._profile_frame = Profile_Page(self)
-            self._profile_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew", columnspan=2, rowspan=4)
-        else:
-            print("Bad!")
+            if self._profile_page == None or not self._profile_page.winfo_exists():
+                print("Good Job")
+                self._profile_page = Profile_Page(self)
+            else:
+                print("Bad!")
     def verify_login(self, username, password):
         #read the file with member info
         file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
@@ -68,11 +65,41 @@ class App(ctk.CTk):
                 return True
         return False
 #A class for the profile page having it inherit from the login page to know what account to use
-class Profile_Page(ctk.CTkFrame):
+class Profile_Page(ctk.CTkToplevel):
     def __init__(self, parent):
         super().__init__(parent)
-        self.title = "good"
-        self.label = ctk.CTkLabel(self, text=self.title)
+        self.geometry("450x480")
+        #Take username and password found in login and get rid of white space
+        self.username = parent.username.strip()
+        self.password = parent.password.strip()
+        print(self.username)
+        self.title(f"{self.username}'s profiles")
+    def _build_ui(self):
+        #set up rows and columns
+        self.rowconfigure(0, weight=5)
+        self.rowconfigure(1, weight=1)
+        self.columnconfigure(0,weight=1)
+        self.columnconfigure(1, weight=5)
+        #create a list of profiles from csv file
+        
+            
+        #create combobox to choose profiles from
+    def _read_profile(self):
+        self.profile_list = []
+        profile = 2
+        file = csv.reader(open('members_profiles', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        #look at each profile
+        for row in file:
+            #get the profile of the person logged in
+            if self.username == row[0] and self.password == row[1]:
+                #check that there are profiles account before adding to the profile list
+                if row[profile] != "None":
+                    self.profile_list.append(row[profile])
+                profile += 1
+
+
 
 
 if __name__ == "__main__":

@@ -1,11 +1,4 @@
 import customtkinter
-class MyFrame(customtkinter.CTkFrame):
-    def __init__(self, parent):
-        super().__init__(parent)
-
-        self.name = App.title
-        self.label = customtkinter.CTkLabel(self, text=self.name)
-        self.label.grid(row=0, column=0, padx=20)
 
 
 class App(customtkinter.CTk):
@@ -15,11 +8,12 @@ class App(customtkinter.CTk):
         self.geometry("400x200")
         self.grid_rowconfigure(0, weight=1)  # configure grid system
         self.grid_columnconfigure(0, weight=1)
-
-
-        self.my_frame = MyFrame(self)
-        self.my_frame.grid(row=0, column=0, padx=20, pady=20, sticky="nsew")
-
+        self.combobox_var = customtkinter.StringVar(value="option 2")
+        self.combobox = customtkinter.CTkComboBox(self, values=["option 1", "option 2"],
+                                            command=self.combobox_callback, variable=self.combobox_var)
+        self.combobox_var.set("option 2")
+        self.combobox.grid(row=0, column=0)
+    def combobox_callback(self, choice):
 
 app = App()
 app.mainloop()
