@@ -14,6 +14,11 @@ class App(customtkinter.CTk):
         self.combobox_var.set("option 2")
         self.combobox.grid(row=0, column=0)
     def combobox_callback(self, choice):
-
+        if choice == "option 1":
+            print("AH")
+        elif choice == "option 2":
+            print("yeah")
+        if choice == None:
+            print("nice")
 app = App()
 app.mainloop()

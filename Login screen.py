@@ -72,34 +72,65 @@ class Profile_Page(ctk.CTkToplevel):
         #Take username and password found in login and get rid of white space
         self.username = parent.username.strip()
         self.password = parent.password.strip()
-        print(self.username)
         self.title(f"{self.username}'s profiles")
+        self._build_ui()
     def _build_ui(self):
         #set up rows and columns
         self.rowconfigure(0, weight=5)
         self.rowconfigure(1, weight=1)
-        self.columnconfigure(0,weight=1)
+        self.columnconfigure(0,weight=3)
         self.columnconfigure(1, weight=5)
         #create a list of profiles from csv file
-        
-            
-        #create combobox to choose profiles from
+        self.profiles = self._read_profile()
+        #create a combobox with the profiles as options
+        self.profile_box = ctk.CTkComboBox(self, values=self.profiles, command=self.describe_profile)
+        #put the combobox in position
+        self.profile_box.grid(row=0, column=0,)
+        #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
+        self.description = "No profile chosen yet"
+        self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
+        #place the textbox down
+        self.description_label.grid(row=0,column=1)
+        #Button to choose profile
+        self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self._submit_profile)
+        self.submit_button.grid(row=1, column=1, columnspan=2)
     def _read_profile(self):
-        self.profile_list = []
-        profile = 2
-        file = csv.reader(open('members_profiles', "r"), delimiter=",")
+        profile_list = []
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
         #make it so that it doesn't read the header row for the file
         next(file)
         #look at each profile
         for row in file:
-            #get the profile of the person logged in
+            #Check to find the profiles of the person logged in
             if self.username == row[0] and self.password == row[1]:
-                #check that there are profiles account before adding to the profile list
-                if row[profile] != "None":
-                    self.profile_list.append(row[profile])
-                profile += 1
-
-
+                #read through each profile when you found the correct username and group
+                for column in row[2:-5]:
+                    #Only add when there are profiles and stop adding when it gets to the 5 profile
+                    if column != "None":
+                        profile_list.append(column)
+        return profile_list
+    def describe_profile(self, choice):
+        #check profiles
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        for row in file:
+            #find the specific user
+            if self.username == row[0] and self.password == row[1]:
+                for number, column in enumerate(row):
+                    #find the specific profile chosen by the user
+                    if choice == column:
+                        #get the specific content rating (which is always down the row from the profile)
+                        self.allowed_content = row[number + 5]
+        #create description based on the profile
+        self.description = f"You have chosen profile: {choice} \n Allowed content up to: {self.allowed_content}"
+        print(self.description)
+        #remake the label to update this
+        self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
+        #place the textbox down
+        self.description_label.grid(row=0,column=1)
+    def _submit_profile(self):
+        print(f"You've chosen {self.profiles}")
 
 
 if __name__ == "__main__":
