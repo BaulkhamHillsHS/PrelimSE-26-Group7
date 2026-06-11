@@ -25,7 +25,31 @@ class Search(ctk.CTkToplevel):
         self.search=ctk.CTkEntry(self, placeholder_text="Search")
         self.search.grid(column=1, row=2, padx=10, pady=10)
 
+        self.searchbt=ctk.CTkButton(self, text="Search")
+        self.searchbt.grid(column=1, row=3)
+
+        self.label=ctk.CTkLabel(self, text="")
+        self.label.grid(column=1,row=4, pady=10)
+
         self.search.delete(0, ctk.END)
+
+        self.combo=ctk.CTkComboBox(self, values=["Comedy", "Horror", "Adventure", "Action"])
+        self.combo.grid(column=2,row=2, padx=20, pady=10)
+
+        self.checkbox=ctk.CTkCheckBox(self, text="R18+")
+        self.checkbox.grid(column=1,row=5, pady=10)
+
+        self.checkbox=ctk.CTkCheckBox(self, text="MA15+")
+        self.checkbox.grid(column=1,row=6, pady=10)
+
+        self.checkbox=ctk.CTkCheckBox(self, text="M")
+        self.checkbox.grid(column=1,row=7, pady=10)
+
+        self.checkbox=ctk.CTkCheckBox(self, text="PG")
+        self.checkbox.grid(column=1,row=8, pady=10)
+
+        self.checkbox=ctk.CTkCheckBox(self, text="G")
+        self.checkbox.grid(column=1,row=9, pady=10)
 
 class App(ctk.CTk):
 
