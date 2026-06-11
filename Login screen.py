@@ -1,11 +1,10 @@
 import customtkinter as ctk
 import csv
 import os
-
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 
-class App(ctk.CTk):
+class Login_screen(ctk.CTk):
     def __init__(self, *args):
         super().__init__()
         self.geometry("450x480")
@@ -89,8 +88,8 @@ class Profile_Page(ctk.CTkToplevel):
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
         self.description = "No profile chosen yet"
         self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
-        #place the textbox down
-        self.description_label.grid(row=0,column=1)
+        #place the description down
+        self.description_label.grid(row=0,column=1,sticky='ew', padx=20)
         #Button to choose profile
         self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self._submit_profile)
         self.submit_button.grid(row=1, column=1, columnspan=2)
@@ -128,11 +127,12 @@ class Profile_Page(ctk.CTkToplevel):
         #remake the label to update this
         self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
         #place the textbox down
-        self.description_label.grid(row=0,column=1)
+        self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def _submit_profile(self):
         print(f"You've chosen {self.profiles}")
 
 
+
 if __name__ == "__main__":
-    app = App()
+    app = Login_screen()
     app.mainloop()
