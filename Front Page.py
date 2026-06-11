@@ -31,7 +31,7 @@ class App(ctk.CTk):
 
     def __init__(self):
         super().__init__()
-        self.title("Yuri Watching")
+        self.title("You're Watching")
         self.geometry("2560x1800")
         self.toplevel_window = None
         self.toplevel_window2 = None
