@@ -62,11 +62,11 @@ class App(ctk.CTk):
         tvname.append("DDLC")
         tvname.append("Toradora")
         tvname.append("Shikanoko Nokonoko Koshitantan")
-        tvname.append("Toradora")
-        tvname.append("Toradora")
-        tvname.append("Toradora")
-        tvname.append("Toradora")
-        tvname.append("Toradora")
+        #tvname.append("Toradora")
+        #tvname.append("Toradora")
+        #tvname.append("Toradora")
+        #tvname.append("Toradora")
+        #tvname.append("Toradora")
 
         thingyb = []
 
