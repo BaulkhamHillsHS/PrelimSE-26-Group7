@@ -70,7 +70,7 @@ class App(ctk.CTk):
 
         tvs.append(ctk.CTkImage(Image.open('luckystar.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('btr.jpg'), size=(200,300)))
-        tvs.append(ctk.CTkImage(Image.open('ddlc.jpg'), size=(200,300)))
+        tvs.append(ctk.CTkImage(Image.open('nothing.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('toradora.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('shikanokonokonokokoshitantan.jpg'), size=(200,300)))
         #tvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/taiga.jpg'), size=(200,300)))
@@ -108,7 +108,7 @@ class App(ctk.CTk):
 
         mvs.append(ctk.CTkImage(Image.open('luckystar.jpg'), size=(150,225)))
         mvs.append(ctk.CTkImage(Image.open('btr.jpg'), size=(150,225)))
-        mvs.append(ctk.CTkImage(Image.open('ddlc.jpg'), size=(150,225)))
+        mvs.append(ctk.CTkImage(Image.open('nothing.jpg'), size=(150,225)))
         mvs.append(ctk.CTkImage(Image.open('toradora.jpg'), size=(150,225)))
         mvs.append(ctk.CTkImage(Image.open('shikanokonokonokokoshitantan.jpg'), size=(150,225)))
         #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/toradora.jpg'), size=(150,225)))
