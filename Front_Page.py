@@ -1,7 +1,7 @@
 import os
 import tkinter as tk
 import customtkinter as ctk
-import Login_screen
+import Login_module
 from PIL import Image
 class Watchlist(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
@@ -19,7 +19,6 @@ class Search(ctk.CTkToplevel):
         self._build_ui()
 
     def _build_ui(self):
-        #create login screen
         self.label = ctk.CTkLabel(self, text="Search", width=300, height=50, font=("Comic Sans MS", 24))
         self.label.grid(column=1, row=1, padx=10, pady=10)
 
@@ -38,11 +37,10 @@ class App(ctk.CTk):
         self.toplevel_window2 = None
         self.login_window = None
         self._build_ui()
-
+        self.login = Login_module.Login_screen()
     def _build_ui(self):
         global x
         x = 0
-        self._openlogin()
         tvs = []
         tvs.append(ctk.CTkImage(Image.open('luckystar.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('btr.jpg'), size=(200,300)))
@@ -149,11 +147,6 @@ class App(ctk.CTk):
             self.toplevel_window2 = Search(self)
         else:
             self.toplevel_window2.focus()
-    def _openlogin(self):
-        if self.login_window is None or not self.login_window.winfo_exists():
-            self.login_window = Login_screen.Login_screen(self)
-            print("nice")
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()

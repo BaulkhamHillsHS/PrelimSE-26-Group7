@@ -1,7 +1,6 @@
 import customtkinter as ctk
 import csv
 import os
-import Front_Page
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 class Login_screen(ctk.CTkToplevel):
@@ -13,7 +12,6 @@ class Login_screen(ctk.CTkToplevel):
         self.title("Login")
         #create username and password instances
         self._profile_page = None
-        self.login_page = Front_Page.App()
     def _build_ui(self):
         #giving different weights to different columns
         self.grid_columnconfigure((0), weight=1)
