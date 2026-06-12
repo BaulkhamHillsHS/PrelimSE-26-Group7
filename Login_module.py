@@ -3,8 +3,7 @@ import csv
 import os
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
-
-class Login_screen(ctk.CTk):
+class Login_screen(ctk.CTkToplevel):
     def __init__(self, *args):
         super().__init__()
         self.geometry("450x480")
@@ -130,7 +129,7 @@ class Profile_Page(ctk.CTkToplevel):
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def _submit_profile(self):
         print(f"You've chosen {self.profiles}")
-
+        self.login_page = Front_Page.App()
 
 
 if __name__ == "__main__":

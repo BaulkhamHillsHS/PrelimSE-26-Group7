@@ -1,8 +1,8 @@
 import os
 import tkinter as tk
 import customtkinter as ctk
+import Login_module
 from PIL import Image
-
 class Watchlist(ctk.CTkToplevel):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -35,15 +35,13 @@ class App(ctk.CTk):
         self.geometry("2560x1800")
         self.toplevel_window = None
         self.toplevel_window2 = None
+        self.login_window = None
         self._build_ui()
-
+        self.login = Login_module.Login_screen()
     def _build_ui(self):
-        
         global x
-
         x = 0
         tvs = []
-
         tvs.append(ctk.CTkImage(Image.open('luckystar.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('btr.jpg'), size=(200,300)))
         tvs.append(ctk.CTkImage(Image.open('ddlc.jpg'), size=(200,300)))
@@ -118,7 +116,7 @@ class App(ctk.CTk):
         self.label = ctk.CTkLabel(self, text="Featured TV Shows", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
         self.label.grid(padx=0, pady=10, column=0, row=1, columnspan=2)
 
-        for i in range(x, 6+x):
+        for i in range(x, 5+x):
             self.label=ctk.CTkLabel(self, text="", image=tvs[i])
             self.label.grid(padx=40, pady=10, column=i+1, row=2)
             thingyb.append(ctk.CTkButton(self, text=tvname[i]))
@@ -129,7 +127,7 @@ class App(ctk.CTk):
         self.label = ctk.CTkLabel(self, text="Featured Movies", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
         self.label.grid(padx=0, pady=10, column=0, row=4, columnspan=2)
 
-        for i in range(x, 6+x):
+        for i in range(x, 5+x):
             self.label=ctk.CTkLabel(self, text="", image=mvs[i])
             self.label.grid(padx=40, pady=10, column=i+1, row=6)
             thingyc.append(ctk.CTkButton(self, text=mvname[i]))
@@ -149,7 +147,6 @@ class App(ctk.CTk):
             self.toplevel_window2 = Search(self)
         else:
             self.toplevel_window2.focus()
-
 if __name__ == "__main__":
     app = App()
     app.mainloop()
