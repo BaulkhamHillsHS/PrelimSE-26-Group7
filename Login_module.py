@@ -49,6 +49,7 @@ class Login_screen(ctk.CTkToplevel):
         if verification == True:
             if self._profile_page == None or not self._profile_page.winfo_exists():
                 print("Good Job")
+                #open up profile page when you log in, as long as it doesn't already exist
                 self._profile_page = Profile_Page(self)
             else:
                 print("Bad!")
@@ -59,7 +60,8 @@ class Login_screen(ctk.CTkToplevel):
         next(file)
         for row in file:
             if username == row[0] and password == row[1]:
-                #if the data is correct make it so that they are verified
+                #if the data is correct make it return true and also create an instance of the account in the code
+                self.account = account_credentials(username, password)
                 return True
         return False
 #A class for the profile page having it inherit from the login page to know what account to use
@@ -70,6 +72,8 @@ class Profile_Page(ctk.CTkToplevel):
         #Take username and password found in login and get rid of white space
         self.username = parent.username.strip()
         self.password = parent.password.strip()
+        #also carry over the instance of the account_credential class
+        self.account = parent.account
         self.title(f"{self.username}'s profiles")
         self._build_ui()
     def _build_ui(self):
@@ -79,7 +83,7 @@ class Profile_Page(ctk.CTkToplevel):
         self.columnconfigure(0,weight=3)
         self.columnconfigure(1, weight=5)
         #create a list of profiles from csv file
-        self.profiles = self._read_profile()
+        self.profiles = self.account.profiles
         #create a combobox with the profiles as options
         self.profile_box = ctk.CTkComboBox(self, values=self.profiles, command=self.describe_profile)
         #put the combobox in position
@@ -92,35 +96,9 @@ class Profile_Page(ctk.CTkToplevel):
         #Button to choose profile
         self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self._submit_profile)
         self.submit_button.grid(row=1, column=1, columnspan=2)
-    def _read_profile(self):
-        profile_list = []
-        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
-        #make it so that it doesn't read the header row for the file
-        next(file)
-        #look at each profile
-        for row in file:
-            #Check to find the profiles of the person logged in
-            if self.username == row[0] and self.password == row[1]:
-                #read through each profile when you found the correct username and group
-                for column in row[2:-5]:
-                    #Only add when there are profiles and stop adding when it gets to the 5 profile
-                    if column != "None":
-                        profile_list.append(column)
-        return profile_list
     def describe_profile(self, choice):
-        #check profiles
-        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
-        #make it so that it doesn't read the header row for the file
-        next(file)
-        for row in file:
-            #find the specific user
-            if self.username == row[0] and self.password == row[1]:
-                for number, column in enumerate(row):
-                    #find the specific profile chosen by the user
-                    if choice == column:
-                        #get the specific content rating (which is always down the row from the profile)
-                        self.allowed_content = row[number + 5]
-        #create description based on the profile
+        #get the allowed content of the profile
+        self.allowed_content = self.account.get_profile_description(choice)
         self.description = f"You have chosen profile: {choice} \n Allowed content up to: {self.allowed_content}"
         print(self.description)
         #remake the label to update this
@@ -129,9 +107,64 @@ class Profile_Page(ctk.CTkToplevel):
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def _submit_profile(self):
         print(f"You've chosen {self.profiles}")
-        self.login_page = Front_Page.App()
-
-
-if __name__ == "__main__":
-    app = Login_screen()
-    app.mainloop()
+class Subscription_page(ctk.CTkFrame):
+    def __init__(self):
+        super().__init__()
+class account_credentials():
+    def __init__(self, username, password):
+        #establish name and password of the account
+        self.username = username
+        self._password = password
+        #establish variables for quick access from other classes of different attributes of users
+        self.profiles = self.get_profiles()
+        self.email = self.get_profile_description("email")
+        self.subscription = self.get_profile_description("subscription")
+        self.payment_info = self.get_profile_description("payment")
+    def get_profiles(self):
+        #create a list for the profiles to go to
+        profile_list = []
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        #look at each profile
+        for row in file:
+            #Check to find the profiles of the person logged in
+            if self.username == row[0] and self._password == row[1]:
+                #read through each profile when you found the correct username and group
+                for column in row[2:-5]:
+                    #Only add when there are profiles and stop adding when it gets to the 5 profile
+                    if column != "None":
+                        profile_list.append(column)
+        return profile_list
+    def get_profile_feature(self, feature):
+        attribute = None
+        file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        for row in file:
+            #Find the row in the csv file of the person logged in
+            if self.username == row[0] and self._password == row[1]:
+                #dependent on what feature was specified get it from the user, email is column 2, subscription is column 3 and payment info is column 4
+                if feature == "email":
+                #get the email which is in the second column
+                    attribute = row[2]
+                elif feature == "subscription":
+                #get the subscription which is in the third column
+                    attribute = row[3]
+                elif feature == "payment":
+                #get the subscription which is in the fourth column
+                    attribute = row[4]
+                return attribute
+    def get_profile_description(self, profile):
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        for row in file:
+            #find the specific user
+            if self.username == row[0] and self._password == row[1]:
+                for number, column in enumerate(row):
+                    #find the specific profile chosen by the user
+                    if profile == column:
+                        #get the specific content rating (which is always down the row from the profile)
+                        allowed_content = row[number + 5]
+                        return allowed_content

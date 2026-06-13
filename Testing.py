@@ -1,24 +1,29 @@
 import customtkinter
+import csv
 
+class account_credentials():
+    def __init__(self, username, password):
+        #establish name and password of the account
+        self.username = username
+        self._password = password
+    def get_profiles(self):
+        #create a list for the progfiles to go to
+        profile_list = []
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        #look at each profile
+        for row in file:
+            #Check to find the profiles of the person logged in
+            if self.username == row[0] and self._password == row[1]:
+                #read through each profile when you found the correct username and group
+                for column in row[2:-5]:
+                    #Only add when there are profiles and stop adding when it gets to the 5 profile
+                    if column != "None":
+                        profile_list.append(column)
+        if profile_list == []:
+            print("Empty")
+        return profile_list
 
-class App(customtkinter.CTk):
-    def __init__(self):
-        super().__init__()
-        self.title("nice")
-        self.geometry("400x200")
-        self.grid_rowconfigure(0, weight=1)  # configure grid system
-        self.grid_columnconfigure(0, weight=1)
-        self.combobox_var = customtkinter.StringVar(value="option 2")
-        self.combobox = customtkinter.CTkComboBox(self, values=["option 1", "option 2"],
-                                            command=self.combobox_callback, variable=self.combobox_var)
-        self.combobox_var.set("option 2")
-        self.combobox.grid(row=0, column=0)
-    def combobox_callback(self, choice):
-        if choice == "option 1":
-            print("AH")
-        elif choice == "option 2":
-            print("yeah")
-        if choice == None:
-            print("nice")
-app = App()
-app.mainloop()
+account = account_credentials("MrDunne", "Baulko11!!").get_profiles()
+print(account)
