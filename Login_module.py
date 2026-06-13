@@ -95,7 +95,10 @@ class Profile_Page(ctk.CTkToplevel):
         self.description_label.grid(row=0,column=1,sticky='ew', padx=20)
         #Button to choose profile
         self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self._submit_profile)
-        self.submit_button.grid(row=1, column=1, columnspan=2)
+        self.submit_button.grid(row=1, column=1)
+        #Button to go to subscription page
+        self.subscription_page_button = ctk.CTkButton(self, text="Go to subscription page", command=self.open_subscription)
+        self.subscription_page_button.grid(row=1,column=0)
     def describe_profile(self, choice):
         #get the allowed content of the profile
         self.allowed_content = self.account.get_profile_description(choice)
@@ -107,9 +110,57 @@ class Profile_Page(ctk.CTkToplevel):
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def _submit_profile(self):
         print(f"You've chosen {self.profiles}")
-class Subscription_page(ctk.CTkFrame):
-    def __init__(self):
-        super().__init__()
+    def open_subscription(self):
+        #open the subscription page frame and have it be the parent
+        self.subscription_page = Subscription_Page(self)
+        self.subscription_page.grid(row=0, column=0, columnspan=2, sticky="nsew")
+class Subscription_Page(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        #get the account from the parent
+        self.account = parent.account
+        #get the subscription of the account
+        self.subscription = self.account.subscription
+        self._build_ui()
+    def _build_ui(self):
+        self.rowconfigure(0, weight=5)
+        self.rowconfigure(1, weight=1)
+        self.columnconfigure(0,weight=3)
+        self.columnconfigure(1, weight=5)
+        #create a combobox with the subscription plans as options
+        self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], command=self.describe_subscription)
+        #put the combobox in position
+        self.subscription_box.grid(row=0, column=0)
+        #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
+        self.subscription_description = "Different plan not chosen yet"
+        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
+        #place the description down
+        self.description_label.grid(row=0,column=1,sticky='ew', padx=20)
+        #Button to choose subscription plan
+        self.submit_button = ctk.CTkButton(self, text="Choose plan", command=self.submit_subscription)
+        self.submit_button.grid(row=1, column=1, columnspan=2)
+    def describe_subscription(self, choice):
+        #give different descriptions based off of subscription chosen
+        if choice == "Budget":
+            self.subscription_description = "blah"
+        elif choice == "Basic":
+            self.subscription_description = "ok"
+        elif choice == "Premium":
+            self.subscription_description = "Yippee"
+        self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
+    def submit_subscription(self):
+        #get the choice of the subscription
+        choice = self.subscription_box.get()
+        #only proceed if the choice is different to the existing plan
+        if choice == self.subscription:
+            print("You already have that subscription")
+        elif choice == "Budget":
+            print("nice")
+        elif choice == "Basic":
+            print("nicer")
+        elif choice == "Premium":
+            print("nicest")
+        print(self.subscription)
 class account_credentials():
     def __init__(self, username, password):
         #establish name and password of the account
@@ -117,9 +168,9 @@ class account_credentials():
         self._password = password
         #establish variables for quick access from other classes of different attributes of users
         self.profiles = self.get_profiles()
-        self.email = self.get_profile_description("email")
+        self._email = self.get_profile_description("email")
         self.subscription = self.get_profile_description("subscription")
-        self.payment_info = self.get_profile_description("payment")
+        self.__payment_info = self.get_profile_description("payment")
     def get_profiles(self):
         #create a list for the profiles to go to
         profile_list = []
