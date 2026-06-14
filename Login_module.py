@@ -141,12 +141,16 @@ class Subscription_Page(ctk.CTkFrame):
         self.submit_button.grid(row=1, column=1, columnspan=2)
     def describe_subscription(self, choice):
         #give different descriptions based off of subscription chosen
+        print("okay")
+        print(choice)
         if choice == "Budget":
             self.subscription_description = "blah"
         elif choice == "Basic":
             self.subscription_description = "ok"
         elif choice == "Premium":
             self.subscription_description = "Yippee"
+        #update subscriiption description
+        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def submit_subscription(self):
         #get the choice of the subscription
@@ -168,9 +172,9 @@ class account_credentials():
         self._password = password
         #establish variables for quick access from other classes of different attributes of users
         self.profiles = self.get_profiles()
-        self._email = self.get_profile_description("email")
-        self.subscription = self.get_profile_description("subscription")
-        self.__payment_info = self.get_profile_description("payment")
+        self._email = self.get_profile_feature("email")
+        self.subscription = self.get_profile_feature("subscription")
+        self.__payment_info = self.get_profile_feature("payment")
     def get_profiles(self):
         #create a list for the profiles to go to
         profile_list = []
