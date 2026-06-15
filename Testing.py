@@ -26,4 +26,21 @@ class account_credentials():
         return profile_list
 
 account = account_credentials("MrDunne", "Baulko11!!").get_profiles()
-print(account)
+file = csv.reader(open('members_profiles.csv', "r"))
+lines = list(file)
+print(len(lines))
+a_list = [[1, 2, 3], [4, 5, 6], [7, 8, 9]]
+a_list = "\n".join(str(a_list))
+print(a_list)
+
+
+def blah():
+        with open('testing_file.csv', "w", newline='', encoding="utf-8") as file:
+            writer = csv.writer(file, delimiter="")
+            writer.writerow(lines)
+        print(lines)
+        print("THENNNNNn")
+        tile = csv.reader(open('testing_file.csv', "r"))
+        #make lists for each row
+        tines = list(tile)
+        print(tines)

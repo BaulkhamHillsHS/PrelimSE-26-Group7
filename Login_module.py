@@ -193,7 +193,7 @@ class account_credentials():
         return profile_list
     def get_profile_feature(self, feature):
         attribute = None
-        file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
+        file = csv.reader(open('testing_file.csv', "r"), delimiter=",")
         #make it so that it doesn't read the header row for the file
         next(file)
         for row in file:
@@ -223,3 +223,28 @@ class account_credentials():
                         #get the specific content rating (which is always down the row from the profile)
                         allowed_content = row[number + 5]
                         return allowed_content
+    def change_subscription(self, subscription):
+        #open file with subscribed members
+        file = csv.reader(open('testing_file.csv', "r"))
+        #make lists for each row
+        lines = list(file)
+        #make a variable to hold the number the row which the account is in
+        account_row = None
+        for number, row in enumerate(lines):
+            #find the specific user
+            if self.username == row[0] and self._password == row[1]:
+                account_row = number
+        #change the fourth item on that row because that is the subscription column, changing to the specified subscription
+        lines[number][3] = subscription
+        #write the newly edited file back row by row
+        with open('testing_file.csv', "w", newline='', encoding="utf-8") as file:
+            writer = csv.writer(file)
+            for line in lines:
+                writer.writerow(line)
+        #update the subscription variable
+        self.subscription = subscription
+
+account = account_credentials("u", "p")
+print(account.subscription)
+account.change_subscription("zimiy")
+print(account.subscription)
