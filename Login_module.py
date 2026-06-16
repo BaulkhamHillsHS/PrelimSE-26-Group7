@@ -121,6 +121,8 @@ class Subscription_Page(ctk.CTkFrame):
         self.account = parent.account
         #get the subscription of the account
         self.subscription = self.account.subscription
+        #make a variable for if they choose a new subscription
+        self.new_subscription = None
         self._build_ui()
     def _build_ui(self):
         self.rowconfigure(0, weight=5)
@@ -154,17 +156,100 @@ class Subscription_Page(ctk.CTkFrame):
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def submit_subscription(self):
         #get the choice of the subscription
-        choice = self.subscription_box.get()
+        self.new_subscription = self.subscription_box.get()
         #only proceed if the choice is different to the existing plan
-        if choice == self.subscription:
+        if self.new_subscription == self.subscription:
             print("You already have that subscription")
-        elif choice == "Budget":
+        elif self.new_subscription == "Budget":
             print("nice")
-        elif choice == "Basic":
+        elif self.new_subscription == "Basic":
             print("nicer")
-        elif choice == "Premium":
+        elif self.new_subscription == "Premium":
             print("nicest")
-        print(self.subscription)
+        #go to submit subscription page
+        self.payment_page = Payment_page(self)
+        self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
+class Payment_page(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.account = parent.account
+        self.subscription = parent.new_subscription
+        self.username = self.account.username
+        self.password = self.account._password
+        #also get the viewable payment info of the user in this class
+        self.payment_info = self.account._viewable_payment_info
+        self._build_ui()
+    def _build_ui(self):
+        #create a column
+        self.columnconfigure(0, weight=1)
+        #create 4 rows
+        self.grid_rowconfigure((0,2,3), weight=2)
+        self.grid_rowconfigure((1,4), weight=1)
+        #Label asking for you to pay to change subscription
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Pay To Change Subscription", bg_color= "transparent", font=("Calibri", 24))
+        self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10)
+        #Payment info Pin 
+        self.bank_prompt_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Payment information", fg_color="transparent")
+        self.bank_prompt_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
+        self.bank_details_text = ctk.CTkTextbox(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.bank_details_text.grid(row=2, sticky= "ew", pady=10, padx=10)
+        #Payment button
+        self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription", command=self.pay_subscription)
+        self.payment_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
+                                 
+    def pay_subscription(self):
+        print(f"Your was {self.account.subscription}")
+        print(self.payment_info)
+        #get the payment info that was typed in
+        self.pin = self.bank_details_text.get("0.0", "end")
+        #also strip it
+        self.pin = self.pin.strip()
+        #make sure it is correct
+        if self.pin == str(self.payment_info):
+            #make sure that the subscription being paid for is different to what the account already has
+            if self.account.subscription != self.subscription:
+                #change the subscription
+                self.account.change_subscription(self.subscription)
+                print(f"Your subscription is now {self.account.subscription}")
+            else:
+                print("You already have that subscription")
+        else:
+            print("wrong password")
+class Page_navigation_panel(ctk.CTkFrame):
+    def __init__(self, panel):
+        super().__init__()
+        self.panel = panel
+        self._build_ui()
+    def _build_ui(self):
+        #create 2 columns
+        self.columnconfigure(0, weight=1)
+        #create 1 row
+        self.grid_rowconfigure((0), weight=2)
+        #Payment button
+        self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription")
+        self.payment_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
+    def choose_buttons(self):
+        if self.panel == "Login":
+            #show no buttons if it is the login screen
+            pass
+        if self.panel == "Profile":
+            #make a button to go back to the login page
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1.grid(row=1, column=0, sticky= "nsew", columnspan=2, pady=10, padx=10)
+        elif self.panel == "Subscription":
+            #make a button to go back to the login page
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
+            #make a button to go back to the Profile page
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Profile Page")
+            self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
+        elif self.panel == "Payment":
+            #make a button to go back to the login page
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
+            #make a button to go back to the Subscription page
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Subscription Page")
+            self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
 class account_credentials():
     def __init__(self, username, password):
         #establish name and password of the account
@@ -172,9 +257,11 @@ class account_credentials():
         self._password = password
         #establish variables for quick access from other classes of different attributes of users
         self.profiles = self.get_profiles()
-        self._email = self.get_profile_feature("email")
-        self.subscription = self.get_profile_feature("subscription")
-        self.__payment_info = self.get_profile_feature("payment")
+        self._email = self.__get_profile_feature("email")
+        self.subscription = self.__get_profile_feature("subscription")
+        self.__payment_info = self.__get_profile_feature("payment")
+        #make a variable so that the mangled payment info can be seen by other classes but not acessed (as in it only shows the payment info but doesn't allow you to change it internally)
+        self._viewable_payment_info = self.__payment_info
     def get_profiles(self):
         #create a list for the profiles to go to
         profile_list = []
@@ -191,9 +278,9 @@ class account_credentials():
                     if column != "None":
                         profile_list.append(column)
         return profile_list
-    def get_profile_feature(self, feature):
+    def __get_profile_feature(self, feature):
         attribute = None
-        file = csv.reader(open('testing_file.csv', "r"), delimiter=",")
+        file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
         #make it so that it doesn't read the header row for the file
         next(file)
         for row in file:
@@ -225,7 +312,7 @@ class account_credentials():
                         return allowed_content
     def change_subscription(self, subscription):
         #open file with subscribed members
-        file = csv.reader(open('testing_file.csv', "r"))
+        file = csv.reader(open('subscribed_members.csv', "r"))
         #make lists for each row
         lines = list(file)
         #make a variable to hold the number the row which the account is in
@@ -237,14 +324,9 @@ class account_credentials():
         #change the fourth item on that row because that is the subscription column, changing to the specified subscription
         lines[number][3] = subscription
         #write the newly edited file back row by row
-        with open('testing_file.csv', "w", newline='', encoding="utf-8") as file:
+        with open('subscribed_members.csv', "w", newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
             for line in lines:
                 writer.writerow(line)
         #update the subscription variable
         self.subscription = subscription
-
-account = account_credentials("u", "p")
-print(account.subscription)
-account.change_subscription("zimiy")
-print(account.subscription)
