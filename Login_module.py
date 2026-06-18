@@ -10,8 +10,25 @@ class Login_screen(ctk.CTkToplevel):
         #create the UI and show it on screen
         self._build_ui()
         self.title("Login")
-        #create username and password instances
+        #have variables of the window and the navigation frame, so that when the pages are created again (going through this class because it is used as the parent) everything an error for it not having a attribute isn't put up
+        self.window = self
+        self.navigation_frame = None
+    def _build_ui(self):
+        #giving different weights to different columns
+        self.grid_columnconfigure((0), weight=1)
+        self.grid_columnconfigure((1), weight=20)
+        #Creating a row
+        self.grid_rowconfigure((0), weight=10)
+        self.login_page = Login_Page(self)
+        self.login_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
+#A class for the login page
+class Login_Page(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
         self._profile_page = None
+        self.window = parent
+        #create ui
+        self._build_ui()
     def _build_ui(self):
         #giving different weights to different columns
         self.grid_columnconfigure((0), weight=1)
@@ -22,37 +39,42 @@ class Login_screen(ctk.CTkToplevel):
         self.grid_rowconfigure((3), weight=2)
         #Login Label
         self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Login", bg_color= "transparent")
-        self.label.grid(row=0, column=0, sticky= "nsw", padx=10, pady=10, columnspan=2)
+        self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10, columnspan=2)
         #Username
         self.username_label = ctk.CTkLabel(self, width=20, height=10, text="Username", bg_color="green", fg_color="blue")
         self.username_label.grid(row=1, column=0, sticky="e")
         self.username_label.grid_columnconfigure((0), weight=1)
-        self.username_text = ctk.CTkTextbox(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
-        self.username_text.grid(row=1, column=1, sticky= "ew", pady=10, padx=10)
-        self.username_text.grid_columnconfigure((1), weight=10)
+        self.username_text = ctk.CTkEntry(self, fg_color="blue", corner_radius= 0, height= 10, width= 400)
+        self.username_text.grid(row=1, column=1, pady=10, padx=10, sticky="ew")
         #password
         self.password_label = ctk.CTkLabel(self, width=20, height=10, text="Password", bg_color="green", fg_color="blue")
         self.password_label.grid(row=2, column=0, sticky="e")
-        self.password_text = ctk.CTkTextbox(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.password_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
         self.password_text.grid(row=2, column=1, sticky= "ew", pady=10, padx=10)
         #login button
         self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit",  command= self.login_submission)
         self.login_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10, columnspan=2)
+        #create instance of navigation frame and put it on the screen
+        self.navigation_frame = Page_navigation_panel(self.window, "Login", None)
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def login_submission(self):
         #Get username that was typed in
-        self.username = self.username_text.get("0.0", "end")
+        self.username = self.username_text.get()
         #Get username that was typed in
-        self.password = self.password_text.get("0.0", "end")
+        self.password = self.password_text.get()
         print(f"{self.username}, {self.password}")
         #Check if the login details are correct
         verification = self.verify_login(self.username.strip(), self.password.strip())
         if verification == True:
-            if self._profile_page == None or not self._profile_page.winfo_exists():
+            if self._profile_page == None:
                 print("Good Job")
                 #open up profile page when you log in, as long as it doesn't already exist
-                self._profile_page = Profile_Page(self)
+                self._profile_page = Profile_Page(self, self.account)
+                self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=4)
+                #self.title(f"{self.username.strip()}'s profiles")
             else:
                 print("Bad!")
+
     def verify_login(self, username, password):
         #read the file with member info
         file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
@@ -65,16 +87,23 @@ class Login_screen(ctk.CTkToplevel):
                 return True
         return False
 #A class for the profile page having it inherit from the login page to know what account to use
-class Profile_Page(ctk.CTkToplevel):
-    def __init__(self, parent):
+class Profile_Page(ctk.CTkFrame):
+    def __init__(self, parent, account):
         super().__init__(parent)
-        self.geometry("450x480")
-        #Take username and password found in login and get rid of white space
-        self.username = parent.username.strip()
-        self.password = parent.password.strip()
-        #also carry over the instance of the account_credential class
-        self.account = parent.account
-        self.title(f"{self.username}'s profiles")
+        #Carry over the instance of the account_credential class
+        self.account = account
+        #get username and pass word from the account
+        self.username = account.username
+        self.password = account._password
+        #also have it remember what window it is on (so that when it creates the navigation panel frame it knows what to put it on)
+        self.window = parent.window
+        #destroy old navigation panel if it exists
+        try:
+            parent.navigation_frame.destroy()
+        except:
+            pass
+        #create a new navigation panel on the same window
+        self.navigation_frame = Page_navigation_panel(self.window, "Profile", self.account)
         self._build_ui()
     def _build_ui(self):
         #set up rows and columns
@@ -99,6 +128,8 @@ class Profile_Page(ctk.CTkToplevel):
         #Button to go to subscription page
         self.subscription_page_button = ctk.CTkButton(self, text="Go to subscription page", command=self.open_subscription)
         self.subscription_page_button.grid(row=1,column=0)
+        #put in the navigation frame
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def describe_profile(self, choice):
         #get the allowed content of the profile
         self.allowed_content = self.account.get_profile_description(choice)
@@ -112,17 +143,26 @@ class Profile_Page(ctk.CTkToplevel):
         print(f"You've chosen {self.profiles}")
     def open_subscription(self):
         #open the subscription page frame and have it be the parent
-        self.subscription_page = Subscription_Page(self)
-        self.subscription_page.grid(row=0, column=0, columnspan=2, sticky="nsew")
+        self.subscription_page = Subscription_Page(self, self.account)
+        self.subscription_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
 class Subscription_Page(ctk.CTkFrame):
-    def __init__(self, parent):
+    def __init__(self, parent, account):
         super().__init__(parent)
         #get the account from the parent
-        self.account = parent.account
+        self.account = account
         #get the subscription of the account
         self.subscription = self.account.subscription
         #make a variable for if they choose a new subscription
         self.new_subscription = None
+        #again have it remember what window it is on (so that when it creates the navigation panel frame it knows what to put it on)
+        self.window = parent.window
+        #destroy old navigation panel if it exists
+        try:
+            parent.navigation_frame.destroy()
+        except:
+            pass
+        #create a new navigation panel on the same window
+        self.navigation_frame = Page_navigation_panel(self.window, "Subscription", self.account)
         self._build_ui()
     def _build_ui(self):
         self.rowconfigure(0, weight=5)
@@ -141,6 +181,8 @@ class Subscription_Page(ctk.CTkFrame):
         #Button to choose subscription plan
         self.submit_button = ctk.CTkButton(self, text="Choose plan", command=self.submit_subscription)
         self.submit_button.grid(row=1, column=1, columnspan=2)
+        #navigation frame
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def describe_subscription(self, choice):
         #give different descriptions based off of subscription chosen
         print("okay")
@@ -166,9 +208,10 @@ class Subscription_Page(ctk.CTkFrame):
             print("nicer")
         elif self.new_subscription == "Premium":
             print("nicest")
-        #go to submit subscription page
-        self.payment_page = Payment_page(self)
-        self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
+        #go to submit subscription page as long as it is different
+        if self.new_subscription != self.subscription:
+            self.payment_page = Payment_page(self)
+            self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
 class Payment_page(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -178,6 +221,12 @@ class Payment_page(ctk.CTkFrame):
         self.password = self.account._password
         #also get the viewable payment info of the user in this class
         self.payment_info = self.account._viewable_payment_info
+        #again have it remember what window it is on (so that when it creates the navigation panel frame it knows what to put it on)
+        self.window = parent.window
+        #destroy old navigation panel
+        parent.navigation_frame.destroy()
+        #create a new navigation panel on the same window
+        self.navigation_frame = Page_navigation_panel(self.window, "Payment", self.account)
         self._build_ui()
     def _build_ui(self):
         #create a column
@@ -191,17 +240,18 @@ class Payment_page(ctk.CTkFrame):
         #Payment info Pin 
         self.bank_prompt_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Payment information", fg_color="transparent")
         self.bank_prompt_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
-        self.bank_details_text = ctk.CTkTextbox(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.bank_details_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
         self.bank_details_text.grid(row=2, sticky= "ew", pady=10, padx=10)
         #Payment button
         self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription", command=self.pay_subscription)
         self.payment_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
-                                 
+        #navigation frame
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def pay_subscription(self):
         print(f"Your was {self.account.subscription}")
         print(self.payment_info)
         #get the payment info that was typed in
-        self.pin = self.bank_details_text.get("0.0", "end")
+        self.pin = self.bank_details_text.get()
         #also strip it
         self.pin = self.pin.strip()
         #make sure it is correct
@@ -215,41 +265,58 @@ class Payment_page(ctk.CTkFrame):
                 print("You already have that subscription")
         else:
             print("wrong password")
+#class for a frame that will go at the bottom of the screen allowing navigation to
 class Page_navigation_panel(ctk.CTkFrame):
-    def __init__(self, panel):
-        super().__init__()
-        self.panel = panel
+    def __init__(self, parent, page, account):
+        super().__init__(parent)
+        #The pages correspond with what top frame calling the page_navigation which will change what buttons show up and what pages will which can be navigated to
+        self.panel = page
+        #Having so that it inherits the existing instance of the window opened so that the frame is put on the existing window
+        self.window = parent
+        #Having so that it inherits the account logged in so that it can pass it on when it makes a new instance of the old page it still gives the account details
+        self.account = account
         self._build_ui()
     def _build_ui(self):
         #create 2 columns
-        self.columnconfigure(0, weight=1)
+        self.grid_columnconfigure((0,1), weight=1)
         #create 1 row
-        self.grid_rowconfigure((0), weight=2)
-        #Payment button
-        self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription")
-        self.payment_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
+        self.grid_rowconfigure((0), weight=1)
+        #Create buttons
+        self.choose_buttons()
     def choose_buttons(self):
         if self.panel == "Login":
             #show no buttons if it is the login screen
             pass
         if self.panel == "Profile":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", columnspan=2, pady=10, padx=10)
         elif self.panel == "Subscription":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
             #make a button to go back to the Profile page
-            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Profile Page")
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Profile Page", command=self.back_profile)
             self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
         elif self.panel == "Payment":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page")
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
             #make a button to go back to the Subscription page
-            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Subscription Page")
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Subscription Page", command=self.back_subscription)
             self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
+    def back_login(self):
+        #creating a instance of the login_page but have it be so that it's parent is the carried over instance of the window, so when you put it on with grid it will be placed on the grind of the window and not within this frame
+        self.login_page = Login_Page(self.window)
+        self.login_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
+    #function for going back to the profile page
+    def back_profile(self):
+        self.profile_page = Profile_Page(self.window, self.account)
+        self.profile_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
+    #function for going back to the subscription page
+    def back_subscription(self):
+        self.subscription_page = Subscription_Page(self.window, self.account)
+        self.subscription_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
 class account_credentials():
     def __init__(self, username, password):
         #establish name and password of the account
