@@ -1,5 +1,6 @@
 import customtkinter as ctk
 import csv
+import tkinter as tk
 import os
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
@@ -71,9 +72,10 @@ class Login_Page(ctk.CTkFrame):
                 #open up profile page when you log in, as long as it doesn't already exist
                 self._profile_page = Profile_Page(self, self.account)
                 self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=4)
-                #self.title(f"{self.username.strip()}'s profiles")
-            else:
-                print("Bad!")
+                
+        else:
+            #show warning if you don't put in a valid username/password
+            tk.messagebox.showwarning("Invalid username or password", "There doesn't seem to be a user matched with these details")
 
     def verify_login(self, username, password):
         #read the file with member info
@@ -86,6 +88,7 @@ class Login_Page(ctk.CTkFrame):
                 self.account = account_credentials(username, password)
                 return True
         return False
+
 #A class for the profile page having it inherit from the login page to know what account to use
 class Profile_Page(ctk.CTkFrame):
     def __init__(self, parent, account):
@@ -114,7 +117,7 @@ class Profile_Page(ctk.CTkFrame):
         #create a list of profiles from csv file
         self.profiles = self.account.profiles
         #create a combobox with the profiles as options
-        self.profile_box = ctk.CTkComboBox(self, values=self.profiles, command=self.describe_profile)
+        self.profile_box = ctk.CTkComboBox(self, values=self.profiles, state="readonly", command=self.describe_profile)
         #put the combobox in position
         self.profile_box.grid(row=0, column=0,)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
@@ -140,7 +143,12 @@ class Profile_Page(ctk.CTkFrame):
         #place the textbox down
         self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
     def _submit_profile(self):
-        print(f"You've chosen {self.profiles}")
+        #check if a profile has been chosen
+        if self.profile_box.get() == "":
+            tk.messagebox.showwarning("Unchosen profile", "You have not chosen a profile yet")
+        else:
+            print(self.profile_box.get())
+            print(f"You've chosen {self.profiles}")
     def open_subscription(self):
         #open the subscription page frame and have it be the parent
         self.subscription_page = Subscription_Page(self, self.account)
@@ -152,8 +160,6 @@ class Subscription_Page(ctk.CTkFrame):
         self.account = account
         #get the subscription of the account
         self.subscription = self.account.subscription
-        #make a variable for if they choose a new subscription
-        self.new_subscription = None
         #again have it remember what window it is on (so that when it creates the navigation panel frame it knows what to put it on)
         self.window = parent.window
         #destroy old navigation panel if it exists
@@ -170,7 +176,7 @@ class Subscription_Page(ctk.CTkFrame):
         self.columnconfigure(0,weight=3)
         self.columnconfigure(1, weight=5)
         #create a combobox with the subscription plans as options
-        self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], command=self.describe_subscription)
+        self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], state="readonly", command=self.describe_subscription)
         #put the combobox in position
         self.subscription_box.grid(row=0, column=0)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
@@ -208,8 +214,12 @@ class Subscription_Page(ctk.CTkFrame):
             print("nicer")
         elif self.new_subscription == "Premium":
             print("nicest")
-        #go to submit subscription page as long as it is different
-        if self.new_subscription != self.subscription:
+        #go to Payment subscription page if a plan is chosen and it is different from original plan
+        if self.new_subscription == "":
+            tk.messagebox.showwarning("Unchosen Plan", "You have not chosen a plan yet")
+        elif self.new_subscription == self.subscription:
+            tk.messagebox.showwarning("Same Plan", "The plan you have chosen is the same as your existing one, you cannot swap to it")
+        elif self.new_subscription != self.subscription:
             self.payment_page = Payment_page(self)
             self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
 class Payment_page(ctk.CTkFrame):
@@ -258,13 +268,17 @@ class Payment_page(ctk.CTkFrame):
         if self.pin == str(self.payment_info):
             #make sure that the subscription being paid for is different to what the account already has
             if self.account.subscription != self.subscription:
-                #change the subscription
+                #change the subscription and show it to the user
                 self.account.change_subscription(self.subscription)
                 print(f"Your subscription is now {self.account.subscription}")
+                tk.messagebox.showinfo("Payment succeeded", f"Payment for the {self.account.subscription} plan has gone through")
             else:
-                print("You already have that subscription")
+                tk.messagebox.showwarning("Same Plan", "You have already paid for that subscription plan")
+        elif self.pin == "":
+            tk.messagebox.showwarning("Unfilled information", "You have not filled the bank credentials")
         else:
-            print("wrong password")
+            #notify the user if they did not put the correct bank information 
+            tk.messagebox.showwarning("Invalid Bank Information", "That is not your payment details")
 #class for a frame that will go at the bottom of the screen allowing navigation to
 class Page_navigation_panel(ctk.CTkFrame):
     def __init__(self, parent, page, account):
@@ -322,6 +336,8 @@ class account_credentials():
         #establish name and password of the account
         self.username = username
         self._password = password
+        print(f"raw username {username}, normal username {self.username}")
+        print(f"raw password {password}, normal password {self._password}")
         #establish variables for quick access from other classes of different attributes of users
         self.profiles = self.get_profiles()
         self._email = self.__get_profile_feature("email")
@@ -386,10 +402,13 @@ class account_credentials():
         account_row = None
         for number, row in enumerate(lines):
             #find the specific user
+            print(self.username)
+            print(self._password)
             if self.username == row[0] and self._password == row[1]:
+                #remember the account's row
                 account_row = number
         #change the fourth item on that row because that is the subscription column, changing to the specified subscription
-        lines[number][3] = subscription
+        lines[account_row][3] = subscription
         #write the newly edited file back row by row
         with open('subscribed_members.csv', "w", newline='', encoding="utf-8") as file:
             writer = csv.writer(file)
