@@ -4,6 +4,8 @@ import tkinter as tk
 import Front_Page
 import Testing
 import os
+import smtplib
+from email.message import EmailMessage
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 class Login_screen(ctk.CTkToplevel):
@@ -37,11 +39,11 @@ class Login_Page(ctk.CTkFrame):
         self.grid_columnconfigure((0), weight=1)
         self.grid_columnconfigure((1), weight=20)
         #giving different weights to different rows
-        self.grid_rowconfigure((0), weight=1)
+        self.grid_rowconfigure((0,4), weight=1)
         self.grid_rowconfigure((1,2), weight=8)
         self.grid_rowconfigure((3), weight=2)
         #Login Label
-        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Login", bg_color= "transparent")
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Login", fg_color= "transparent", font=("Calibri", 24))
         self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10, columnspan=2)
         #Username
         self.username_label = ctk.CTkLabel(self, width=20, height=10, text="Username", bg_color="green", fg_color="blue")
@@ -57,6 +59,9 @@ class Login_Page(ctk.CTkFrame):
         #login button
         self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit",  command= self.login_submission)
         self.login_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10, columnspan=2)
+        #button if you forget your username and password
+        self.forgotten_button = ctk.CTkButton(self, text="Press if you have forgotten your account details", command=self.send_credentials)
+        self.forgotten_button.grid(row=4, column=0, sticky="ew", pady=10, padx=10, columnspan=2)
         #create instance of navigation frame and put it on the screen
         self.navigation_frame = Page_navigation_panel(self.window, "Login", None, self)
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
@@ -73,7 +78,7 @@ class Login_Page(ctk.CTkFrame):
                 print("Good Job")
                 #open up profile page when you log in, as long as it doesn't already exist
                 self._profile_page = Profile_Page(self, self.account)
-                self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=4)
+                self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=5)
                 
         else:
             #show warning if you don't put in a valid username/password
@@ -87,9 +92,13 @@ class Login_Page(ctk.CTkFrame):
         for row in file:
             if username == row[0] and password == row[1]:
                 #if the data is correct make it return true and also create an instance of the account in the code
-                self.account = account_credentials(username, password)
+                self.account = account_credentials(username, password, None)
                 return True
         return False
+    def send_credentials(self):
+        #Go to the Email_send page
+        self.email_send = Email_Send(self)
+        self.email_send.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=5)
 
 #A class for the profile page having it inherit from the login page to know what account to use
 class Profile_Page(ctk.CTkFrame):
@@ -112,27 +121,31 @@ class Profile_Page(ctk.CTkFrame):
         self._build_ui()
     def _build_ui(self):
         #set up rows and columns
-        self.rowconfigure(0, weight=5)
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(0, weight=2)
+        self.rowconfigure(1, weight=7)
+        self.rowconfigure(2, weight=1)
         self.columnconfigure(0,weight=3)
         self.columnconfigure(1, weight=5)
         #create a list of profiles from csv file
         self.profiles = self.account.profiles
+        #create a title for this page
+        self.profile_title_label = ctk.CTkLabel(self, text=f"{self.username}'s profiles", font=("Calibri", 24), fg_color="transparent")
+        self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the profiles as options
         self.profile_box = ctk.CTkComboBox(self, values=self.profiles, state="readonly", command=self.describe_profile)
         #put the combobox in position
-        self.profile_box.grid(row=0, column=0,)
+        self.profile_box.grid(row=1, column=0,)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
         self.description = "No profile chosen yet"
         self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
         #place the description down
-        self.description_label.grid(row=0,column=1,sticky='ew', padx=20)
+        self.description_label.grid(row=1,column=1,sticky='ew', padx=20)
         #Button to choose profile
-        self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self._submit_profile)
-        self.submit_button.grid(row=1, column=1)
+        self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self.submit_profile)
+        self.submit_button.grid(row=2, column=1)
         #Button to go to subscription page
         self.subscription_page_button = ctk.CTkButton(self, text="Go to subscription page", command=self.open_subscription)
-        self.subscription_page_button.grid(row=1,column=0)
+        self.subscription_page_button.grid(row=2,column=0)
         #put in the navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def describe_profile(self, choice):
@@ -143,25 +156,24 @@ class Profile_Page(ctk.CTkFrame):
         #remake the label to update this
         self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
         #place the textbox down
-        self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
-    def _submit_profile(self):
+        self.description_label.grid(row=1,column=1, sticky="ew", padx=20)
+    def submit_profile(self):
         #check if a profile has been chosen
         if self.profile_box.get() == "":
             tk.messagebox.showwarning("Unchosen profile", "You have not chosen a profile yet")
         else:
             self.profile = self.profile_box.get()
-            print(f"You've chosen {self.profiles}")
+            #get rid of the navigation panel as they go to the main page
+            self.navigation_frame.destroy()
             #create instance of the home page and pass through the account, profile and profile restrictions through
             self.homepage = Testing.Homepage(self.window, self.account, self.profile, self.allowed_content)
             #put it on screen
             self.homepage.grid(row=0,column=0, sticky="nsew")
-            #get rid of the navigation panel as they go to the main page
-            self.navigation_frame.destroy()
             
     def open_subscription(self):
         #open the subscription page frame and have it be the parent
         self.subscription_page = Subscription_Page(self, self.account)
-        self.subscription_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
+        self.subscription_page.grid(row=0, column=0, columnspan=2, rowspan=3, sticky="nsew")
 class Subscription_Page(ctk.CTkFrame):
     def __init__(self, parent, account):
         super().__init__(parent)
@@ -180,22 +192,27 @@ class Subscription_Page(ctk.CTkFrame):
         self.navigation_frame = Page_navigation_panel(self.window, "Subscription", self.account, self)
         self._build_ui()
     def _build_ui(self):
-        self.rowconfigure(0, weight=5)
-        self.rowconfigure(1, weight=1)
+        self.rowconfigure(0, weight=3)
+        self.rowconfigure(1, weight=7)
+        self.rowconfigure(2, weight=1)
         self.columnconfigure(0,weight=3)
         self.columnconfigure(1, weight=5)
+        #create a title for the subscription page
+        #create a title for this page
+        self.profile_title_label = ctk.CTkLabel(self, text=f"Subscription Plans \nExisting plan: {self.subscription} tier", font=("Calibri", 24), fg_color="transparent")
+        self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the subscription plans as options
         self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], state="readonly", command=self.describe_subscription)
         #put the combobox in position
-        self.subscription_box.grid(row=0, column=0)
+        self.subscription_box.grid(row=1, column=0)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
         self.subscription_description = "Different plan not chosen yet"
         self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
         #place the description down
-        self.description_label.grid(row=0,column=1,sticky='ew', padx=20)
+        self.description_label.grid(row=1,column=1,sticky='ew', padx=20)
         #Button to choose subscription plan
         self.submit_button = ctk.CTkButton(self, text="Choose plan", command=self.submit_subscription)
-        self.submit_button.grid(row=1, column=1, columnspan=2)
+        self.submit_button.grid(row=2, column=1, columnspan=2)
         #navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def describe_subscription(self, choice):
@@ -210,7 +227,7 @@ class Subscription_Page(ctk.CTkFrame):
             self.subscription_description = "Yippee"
         #update subscriiption description
         self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
-        self.description_label.grid(row=0,column=1, sticky="ew", padx=20)
+        self.description_label.grid(row=1,column=1, sticky="ew", padx=20)
     def submit_subscription(self):
         #get the choice of the subscription
         self.new_subscription = self.subscription_box.get()
@@ -230,7 +247,7 @@ class Subscription_Page(ctk.CTkFrame):
             tk.messagebox.showwarning("Same Plan", "The plan you have chosen is the same as your existing one, you cannot swap to it")
         elif self.new_subscription != self.subscription:
             self.payment_page = Payment_page(self)
-            self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=2, sticky="nsew")
+            self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=3, sticky="nsew")
 class Payment_page(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -348,20 +365,78 @@ class Page_navigation_panel(ctk.CTkFrame):
         self.subscription_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
         #destroy the old frame when it is called
         self.old_frame.destroy()
+class Email_Send(ctk.CTkFrame):
+    def __init__(self, parent):
+        super().__init__(parent)
+        self.window = parent.window
+        #destroy old navigation panel
+        parent.navigation_frame.destroy()
+        #create a new navigation panel on the same window, it use profile as both use the exact same button
+        self.navigation_frame = Page_navigation_panel(self.window, "Profile", None, self)
+        self._build_ui()
+    def _build_ui(self):
+        #create a column
+        self.columnconfigure(0, weight=1)
+        #create 4 rows
+        self.grid_rowconfigure((0,2,3), weight=2)
+        self.grid_rowconfigure((1,4), weight=1)
+        #Label telling you how to get your credentials
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Lost user credentials", bg_color= "transparent", font=("Calibri", 24))
+        self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10)
+        #Entry box to put in email
+        self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password ", fg_color="transparent")
+        self.email_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
+        self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.email_text.grid(row=2, sticky= "ew", pady=10, padx=10)
+        #email button
+        self.email_button = ctk.CTkButton(self, width= 20, height=10 , text="Find username and password", command=self.send_email)
+        self.email_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
+        #navigation frame
+        self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
+    def send_email(self):
+        #get the email given
+        self.email = self.email_text.get()
+        #create an instance of the user account
+        self.account = account_credentials(None, None, self.email)
+        #send and warning if nothing was typed
+        if self.email == "":
+            tk.messagebox.showwarning("Unfilled email", "You have not filled in your email")
+        else:
+            #make sure the email is actually tied to an account
+            if self.account.username and self.account._password != "None":
+                tk.messagebox.showinfo("Found credentials", f"Your Username is {self.account.username}, you Password is {self.account._password}")
+
+                #message = EmailMessage()
+              #  message.set_content(f"Your account username is {self.account.username}, your password is {self.account._password}")
+               # message['Subject'] = "Lost credentials"
+               # message["From"] = "nathan.lay6@education.nsw.gov.au"
+                #message['To'] = self.email
+                #set up a SMTP connection 
+            #message to show them if them if the email they put actually wasn't part of an account
+            else:
+                tk.messagebox.showwarning("Invalid email", "We are sorry but that email is not tied to an account")
 class account_credentials():
-    def __init__(self, username, password):
-        #establish name and password of the account
-        self.username = username
-        self._password = password
-        print(f"raw username {username}, normal username {self.username}")
-        print(f"raw password {password}, normal password {self._password}")
-        #establish variables for quick access from other classes of different attributes of users
-        self.profiles = self.get_profiles()
-        self._email = self.__get_profile_feature("email")
-        self.subscription = self.__get_profile_feature("subscription")
-        self.__payment_info = self.__get_profile_feature("payment")
-        #make a variable so that the mangled payment info can be seen by other classes but not acessed (as in it only shows the payment info but doesn't allow you to change it internally)
-        self._viewable_payment_info = self.__payment_info
+    def __init__(self, username, password, email):
+        #establish name and password of the account if it is given
+        if username != None and password != None:
+            self.username = username
+            self._password = password
+        #if name and password aren't given find account through email
+        else:
+            self._email = email
+            self.username = self.get_username_and_password("username")
+            self._password = self.get_username_and_password("password")
+        #Try to establish variables for quick access from other classes of different attributes of the account if the credentials are good
+        try:
+            self.profiles = self.get_profiles()
+            self._email = self.__get_profile_feature("email")
+            self.subscription = self.__get_profile_feature("subscription")
+            self.__payment_info = self.__get_profile_feature("payment")
+            #make a variable so that the mangled payment info can be seen by other classes but not acessed (as in it only shows the payment info but doesn't allow you to change it internally)
+            self._viewable_payment_info = self.__payment_info
+        except:
+            #don't do anything
+            pass
     def get_profiles(self):
         #create a list for the profiles to go to
         profile_list = []
@@ -397,6 +472,21 @@ class account_credentials():
                 #get the subscription which is in the fourth column
                     attribute = row[4]
                 return attribute
+    def get_username_and_password(self, feature):
+        #open file
+        file = csv.reader(open('subscribed_members.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        for row in file:
+            #Find the row in the csv file of the user via their email
+            if self._email == row[2]:
+                #give back the attribute based on what was typed to get
+                if feature == "username":
+                    return row[0]
+                elif feature == "password":
+                    return row[1]
+        #if nothing is found notify caller
+        return "None"
     def get_profile_description(self, profile):
         file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
         #make it so that it doesn't read the header row for the file
@@ -407,6 +497,7 @@ class account_credentials():
                 for number, column in enumerate(row):
                     #find the specific profile chosen by the user
                     if profile == column:
+                        print(f"Yes {column} {number}")
                         #get the specific content rating (which is always down the row from the profile)
                         allowed_content = row[number + 5]
                         return allowed_content

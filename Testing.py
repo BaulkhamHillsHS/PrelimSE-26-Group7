@@ -32,7 +32,7 @@ class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("You're Watching")
-        self.geometry("2560x1800")
+        self.geometry("1000x600")
         self.toplevel_window = None
         self.toplevel_window2 = None
         self.login_window = None
