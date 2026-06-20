@@ -75,7 +75,10 @@ class Login_Page(ctk.CTkFrame):
         verification = self.verify_login(self.username.strip(), self.password.strip())
         if verification == True:
             if self._profile_page == None:
-                print("Good Job")
+                #destroy everything in this frame
+                for widget in self.winfo_children():
+                    widget.destroy()
+                print(self.winfo_children())
                 #open up profile page when you log in, as long as it doesn't already exist
                 self._profile_page = Profile_Page(self, self.account)
                 self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=5)
@@ -96,6 +99,9 @@ class Login_Page(ctk.CTkFrame):
                 return True
         return False
     def send_credentials(self):
+        #destroy everything in this frame
+        for widget in self.winfo_children():
+            widget.destroy()
         #Go to the Email_send page
         self.email_send = Email_Send(self)
         self.email_send.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=5)
@@ -165,12 +171,18 @@ class Profile_Page(ctk.CTkFrame):
             self.profile = self.profile_box.get()
             #get rid of the navigation panel as they go to the main page
             self.navigation_frame.destroy()
+            #destroy everything in this frame
+            for widget in self.winfo_children():
+                widget.destroy()
             #create instance of the home page and pass through the account, profile and profile restrictions through
             self.homepage = Testing.Homepage(self.window, self.account, self.profile, self.allowed_content)
             #put it on screen
             self.homepage.grid(row=0,column=0, sticky="nsew")
             
     def open_subscription(self):
+         #destroy everything in this frame
+        for widget in self.winfo_children():
+            widget.destroy()
         #open the subscription page frame and have it be the parent
         self.subscription_page = Subscription_Page(self, self.account)
         self.subscription_page.grid(row=0, column=0, columnspan=2, rowspan=3, sticky="nsew")
@@ -246,6 +258,9 @@ class Subscription_Page(ctk.CTkFrame):
         elif self.new_subscription == self.subscription:
             tk.messagebox.showwarning("Same Plan", "The plan you have chosen is the same as your existing one, you cannot swap to it")
         elif self.new_subscription != self.subscription:
+            #destroy everything in this frame
+            for widget in self.winfo_children():
+                widget.destroy()
             self.payment_page = Payment_page(self)
             self.payment_page.grid(row=0, column=0, columnspan=2, rowspan=3, sticky="nsew")
 class Payment_page(ctk.CTkFrame):
@@ -352,19 +367,25 @@ class Page_navigation_panel(ctk.CTkFrame):
         self.login_page = Login_Page(self.window)
         self.login_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
         #destroy the old frame when it is called
-        self.old_frame.destroy()
+        self.get_rid()
     #function for going back to the profile page
     def back_profile(self):
         self.profile_page = Profile_Page(self.window, self.account)
         self.profile_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
         #destroy the old frame when it is called
-        self.old_frame.destroy()
+        self.get_rid()
     #function for going back to the subscription page
     def back_subscription(self):
         self.subscription_page = Subscription_Page(self.window, self.account)
         self.subscription_page.grid(row=0, column=0, sticky="nsew", columnspan=2)
         #destroy the old frame when it is called
-        self.old_frame.destroy()
+        self.get_rid()
+    def get_rid(self):
+        print(self.old_frame.winfo_children())
+         #destroy everything in the frame calling it
+        for widget in self.old_frame.winfo_children():
+            widget.destroy()
+        print(self.old_frame.winfo_children())
 class Email_Send(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -384,7 +405,7 @@ class Email_Send(ctk.CTkFrame):
         self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Lost user credentials", bg_color= "transparent", font=("Calibri", 24))
         self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10)
         #Entry box to put in email
-        self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password ", fg_color="transparent")
+        self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password \n(through a popup)", fg_color="transparent")
         self.email_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
         self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
         self.email_text.grid(row=2, sticky= "ew", pady=10, padx=10)
@@ -404,7 +425,7 @@ class Email_Send(ctk.CTkFrame):
         else:
             #make sure the email is actually tied to an account
             if self.account.username and self.account._password != "None":
-                tk.messagebox.showinfo("Found credentials", f"Your Username is {self.account.username}, you Password is {self.account._password}")
+                tk.messagebox.showinfo("Found credentials", f"Your Username is {self.account.username}, your Password is {self.account._password}")
 
                 #message = EmailMessage()
               #  message.set_content(f"Your account username is {self.account.username}, your password is {self.account._password}")
