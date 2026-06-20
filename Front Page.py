@@ -61,6 +61,17 @@ class Search(ctk.CTkToplevel):
         self.resizable(False,False)
 
     def _build_ui(self):
+        
+
+        user_restrict = getattr(self.master, "current_restrict", "M")
+        user_level = RATINGS.get(user_restrict, 5)
+
+        self.disabled_ratings = []
+        for rating_string, level_num in RATINGS.items():
+            if level_num > user_level:
+                self.disabled_ratings.append(rating_string)
+
+
         self.label = ctk.CTkLabel(self, text="Search", width=300, height=50, font=("Comic Sans MS", 24))
         self.label.grid(column=1, row=1, padx=10, pady=10)
 
@@ -75,27 +86,37 @@ class Search(ctk.CTkToplevel):
 
         self.searchentry.delete(0, ctk.END)
 
-        self.combo=ctk.CTkComboBox(self, values=["Comedy", "Horror", "Adventure", "Action", "Romance"])
+        self.combo=ctk.CTkComboBox(self, values=["All", "Comedy", "Horror", "Adventure", "Action", "Romance"])
         self.combo.grid(column=2,row=2, padx=10, pady=5)
 
-        self.Rcheckbox=ctk.CTkCheckBox(self, text="R18+")
-        self.Rcheckbox.grid(column=1,row=5, pady=5)
+        if "R18+" in self.disabled_ratings or "R18" in self.disabled_ratings:
+            r_state = "disabled"
+        else:
+            "normal"
+        self.Rcheckbox = ctk.CTkCheckBox(self, text="R18+", state=r_state)
+        self.Rcheckbox.grid(column=1, row=5, pady=5)
 
-        self.MAcheckbox=ctk.CTkCheckBox(self, text="MA15+")
-        self.MAcheckbox.grid(column=1,row=6, pady=5)
+        ma_state = "disabled" if "MA15+" in self.disabled_ratings or "MA15" in self.disabled_ratings else "normal"
+        self.MAcheckbox = ctk.CTkCheckBox(self, text="MA15+", state=ma_state)
+        self.MAcheckbox.grid(column=1, row=6, pady=5)
 
-        self.Mcheckbox=ctk.CTkCheckBox(self, text="M")
-        self.Mcheckbox.grid(column=1,row=7, pady=5)
+        m_state = "disabled" if "M" in self.disabled_ratings else "normal"
+        self.Mcheckbox = ctk.CTkCheckBox(self, text="M", state=m_state)
+        self.Mcheckbox.grid(column=1, row=7, pady=5)
 
-        self.PGcheckbox=ctk.CTkCheckBox(self, text="PG")
-        self.PGcheckbox.grid(column=1,row=8, pady=5)
+        self.PGcheckbox = ctk.CTkCheckBox(self, text="PG")
+        self.PGcheckbox.grid(column=1, row=8, pady=5)
 
-        self.Gcheckbox=ctk.CTkCheckBox(self, text="G")
-        self.Gcheckbox.grid(column=1,row=9, pady=5)
+        self.Gcheckbox = ctk.CTkCheckBox(self, text="G")
+        self.Gcheckbox.grid(column=1, row=9, pady=5)
 
     def search(self):
         query = self.searchentry.get().lower()
+        selected_genre = self.combo.get()
 
+
+
+        # SEARCH FOR RATING
         allowed = []
         if self.Rcheckbox.get() == 1: allowed.append("R18+")
         if self.MAcheckbox.get() == 1: allowed.append("MA15+")
@@ -110,11 +131,20 @@ class Search(ctk.CTkToplevel):
         results = []
 
         for title, details in all_media.items():
-            if query in title.lower() and details["Rating"] in allowed:
-                results.append(title)
-        
-        print(f"results: {results}")
-        self.master.open_results(results)
+            show_rating = details.get("Rating", "G")
+            show_genre = details.get("Genre", "Unknown")
+
+            genrematch = (selected_genre == "All" or show_genre == selected_genre)
+            
+            if query in title.lower() and show_rating in allowed and genrematch:
+                if title in self.mv_data:
+                    results.append([title, "Movie"])
+                else:
+                    results.append([title, "TV"])
+                
+        print(f"Results: {results}")
+        full_data = {**self.tv_data, **self.mv_data}
+        self.master.open_results(results, full_data)
 
 
 
@@ -122,23 +152,31 @@ class Search(ctk.CTkToplevel):
 
 
 class Results(ctk.CTkToplevel):
-    def __init__(self, master, search_results, *args, **kwargs):
+    def __init__(self, master, search_results, media_data, *args, **kwargs):
         super().__init__(master, *args, **kwargs)
-        self.title("Results")
+        self.title("Search Results")
         self.geometry("500x600")
-
-        self.titlelabel = ctk.CTkLabel(self, text="Matching Results", font=("Comic Sans MS", 18, "bold"))
-        self.titlelabel.pack(pady=15)
-
-        self.scroll = ctk.CTkScrollableFrame(self, width=440, height=480)
-        self.scroll.pack(padx=20, pady=10, fill="both", expand=True)
-
+        
+        self.title_lbl = ctk.CTkLabel(self, text="Matching Results", font=("Comic Sans MS", 18, "bold"))
+        self.title_lbl.pack(pady=10)
+        
+        self.scroll_frame = ctk.CTkScrollableFrame(self, width=440, height=480)
+        self.scroll_frame.pack(padx=20, pady=10, fill="both", expand=True)
+        
         if search_results:
             for item in search_results:
-                lbl = ctk.CTkLabel(self.scroll, text=item, font=("Comic Sans MS", 14), anchor="w")
-                lbl.pack(pady=5, padx=10, fill="x")
+                show_title = item[0]
+                media_type = item[1]
+
+                show_info = media_data.get(show_title, {})
+
+                colour = "#6D268B" if media_type == "Movie" else "#325EE2"
+
+                btn = ctk.CTkButton(self.scroll_frame, text=f"> {show_title}", font=("Comic Sans MS", 14), anchor="w", fg_color=colour, command=lambda n=show_title, d=show_info: self.master.openstream(n, d)
+                )
+                btn.pack(pady=5, padx=10, fill="x")
         else:
-            lbl = ctk.CTkLabel(self.scroll, text="No matches found.", font=("Comic Sans MS", 14))
+            lbl = ctk.CTkLabel(self.scroll_frame, text="No results", font=("Comic Sans MS", 14))
             lbl.pack(pady=20)
 
 
@@ -187,13 +225,7 @@ class View(ctk.CTkToplevel): #when you click each show to watch it
         self.side_meta = ctk.CTkLabel(self.sidebar, text=meta_string, text_color="#718CDD", font=("Comic Sans MS", 13), justify="left")
         self.side_meta.pack(pady=5, padx=15, anchor="w")
 
-        self.side_desc = ctk.CTkLabel(
-            self.sidebar, 
-            text=self.info.get("Description", "No description written yet."), 
-            text_color="#cccccc", 
-            font=("Comic Sans MS", 13), 
-            wraplength=280, 
-            justify="left"
+        self.side_desc = ctk.CTkLabel(self.sidebar, text=self.info.get("Description", "No description written yet."), text_color="#cccccc", font=("Comic Sans MS", 13), wraplength=280, justify="left"
         )
         self.side_desc.pack(pady=20, padx=15, anchor="w")
 
@@ -236,12 +268,26 @@ class App(ctk.CTk):
         global x
         x = 0
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         tvs = { #TV Shows
             "Lucky Star" : {
                 "Image":ctk.CTkImage(Image.open("luckystar.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Comedy",
-                "Description":"Placeholder",
+                "Description":"Having fun at school, doing homework together, cooking and eating, playing video games, watching anime. All these little things make up the daily life of anime and chocolate lover Izumi Konata and her friends.",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
             "Bocchi the Rock!" : {
@@ -347,106 +393,118 @@ class App(ctk.CTk):
         tvbuttons = []
 
         y = 0
+
+
+
+
+
+
+
+
+
+
+
+
         mvs = { #Movies
-            "Lucky Star" : {
+            "!Lucky Star" : {
                 "Image":ctk.CTkImage(Image.open("luckystar.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Bocchi the Rock!" : {
+            "!Bocchi the Rock!" : {
                 "Image":ctk.CTkImage(Image.open("btr.jpg"), size=(150,225)),
                 "Rating":"PG",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Doki Doki Literature Club!" : {
+            "!Doki Doki Literature Club!" : {
                 "Image":ctk.CTkImage(Image.open("ddlc.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Horror",
                 "Description":"Just Monika.",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Toradora" : {
+            "!Toradora" : {
                 "Image":ctk.CTkImage(Image.open("toradora.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Romance",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "My Deer Friend Nokotan" : {
+            "!My Deer Friend Nokotan" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Azumanga Daioh" : {
+            "!Azumanga Daioh" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Roshidere" : {
+            "!Roshidere" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"PG",
                 "Genre":"Romance",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "K-On!" : {
+            "!K-On!" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Girls' Last Tour" : {
+            "!Girls' Last Tour" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Adventure",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Onimai" : {
+            "!Onimai" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"M",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "Nichijou" : {
+            "!Nichijou" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "K-On!!" : {
+            "!K-On!!" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "K-On!!!" : {
+            "!K-On!!!" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "K-On!!!!" : {
+            "!K-On!!!!" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
                 "Description":"Placeholder",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 },
-            "K-On!!!!!" : {
+            "!K-On!!!!!" : {
                 "Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),
                 "Rating":"G",
                 "Genre":"Comedy",
@@ -454,6 +512,18 @@ class App(ctk.CTk):
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
                 }
         }
+
+
+
+
+
+
+
+
+
+
+
+
 
         current_restrict = "M"
 
@@ -522,13 +592,12 @@ class App(ctk.CTk):
         else:
             self.toplevel_window2.focus()
 
-    def open_results(self, results):
+    def open_results(self, results, full_data):
         if self.results_window is None or not self.results_window.winfo_exists():
-            self.results_window = Results(self, search_results=results)
+            self.results_window = Results(self, search_results=results, media_data=full_data)
         else:
             self.results_window.destroy()
-            self.results_window = Results(self, search_results=results)
-
+            self.results_window = Results(self, search_results=results, media_data=full_data)
 
     def openstream(self, name, info):
         if self.toplevel_window3 is None or not self.toplevel_window3.winfo_exists():
@@ -555,4 +624,4 @@ class App(ctk.CTk):
 
 if __name__ == "__main__":
     app = App()
-    app.mainloop()    
+    app.mainloop()
