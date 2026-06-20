@@ -54,11 +54,16 @@ class Search(ctk.CTkToplevel):
         self.Gcheckbox.grid(column=1,row=9, pady=5)
 
     def search():
-        for name in tvname:
-            pass
+        #for name in tvname:
+        pass
 
-class App(ctk.CTkToplevel):
+class View(ctk.CTkToplevel): #when you click each show to watch it
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args,**kwargs)
+        title = str("")
+        self.title(title)
 
+class App(ctk.CTk):
     def __init__(self):
         super().__init__()
         self.title("You're Watching")
@@ -66,55 +71,50 @@ class App(ctk.CTkToplevel):
         self.toplevel_window = None
         self.toplevel_window2 = None
         self.login_window = None
-        self._build_ui()
         self.login = Login_module.Login_screen()
-    def _build_ui(self):
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+
+        self.scroll_frame = ctk.CTkScrollableFrame(self)
+        self.scroll_frame.grid(row=0, column=0, sticky="nsew")
+
+        self._build_ui(self.scroll_frame)
+
+    def _build_ui(self, target_frame):
         global x
         x = 0
 
         tvs = {
-            "Lucky Star" : {"Image":"luckystar.jpg","Rating":"M","Genre":"Comedy"},
-            "Bocchi the Rock!" : {"Image":"btr.jpg","Rating":"PG","Genre":"Comedy"},
-            "Doki Doki Literature Club!" : {"Image":"ddlc.jpg","Rating":"M","Genre":"Horror"},
-            "Toradora" : {"Image":"toradora.jpg","Rating":"M","Genre":"Romance"},
-            "My Deer Friend Nokotan" : {"Image":"shikanokonokonokokoshitantan.jpg","Rating":"M","Genre":"Comedy"},
-            "Azumanga Daioh" : {"Image":"luckystar.jpg","Rating":"M","Genre":"Comedy"},
-            "Roshidere" : {"Image":"btr.jpg","Rating":"PG","Genre":"Comedy"},
-            "a" : {"Image":"ddlc.jpg","Rating":"M","Genre":"Horror"},
-            "a" : {"Image":"toradora.jpg","Rating":"M","Genre":"Romance"},
-            "a" : {"Image":"shikanokonokonokokoshitantan.jpg","Rating":"M","Genre":"Comedy"}
+            "Lucky Star" : {"Image":ctk.CTkImage(Image.open("luckystar.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Bocchi the Rock!" : {"Image":ctk.CTkImage(Image.open("btr.jpg"), size=(150,225)),"Rating":"PG","Genre":"Comedy"},
+            "Doki Doki Literature Club!" : {"Image":ctk.CTkImage(Image.open("ddlc.jpg"), size=(150,225)),"Rating":"M","Genre":"Horror"},
+            "Toradora" : {"Image":ctk.CTkImage(Image.open("toradora.jpg"), size=(150,225)),"Rating":"M","Genre":"Romance"},
+            "My Deer Friend Nokotan" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Azumanga Daioh" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Roshidere" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"PG","Genre":"Romance"},
+            "K-On!" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Girls' Last Tour" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Adventure"},
+            "Onimai" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"}
         }
 
         tvbuttons = []
 
         y = 0
-        mvs = []
+        mvs = {
+            "Lucky Star" : {"Image":ctk.CTkImage(Image.open("luckystar.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Bocchi the Rock!" : {"Image":ctk.CTkImage(Image.open("btr.jpg"), size=(150,225)),"Rating":"PG","Genre":"Comedy"},
+            "Doki Doki Literature Club!" : {"Image":ctk.CTkImage(Image.open("ddlc.jpg"), size=(150,225)),"Rating":"M","Genre":"Horror"},
+            "Toradora" : {"Image":ctk.CTkImage(Image.open("toradora.jpg"), size=(150,225)),"Rating":"M","Genre":"Romance"},
+            "My Deer Friend Nokotan" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Azumanga Daioh" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Roshidere" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"PG","Genre":"Romance"},
+            "K-On!" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"},
+            "Girls' Last Tour" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Adventure"},
+            "Onimai" : {"Image":ctk.CTkImage(Image.open("shikanokonokonokokoshitantan.jpg"), size=(150,225)),"Rating":"M","Genre":"Comedy"}
+        }
 
-        mvs.append(ctk.CTkImage(Image.open('luckystar.jpg'), size=(150,225)))
-        mvs.append(ctk.CTkImage(Image.open('btr.jpg'), size=(150,225)))
-        mvs.append(ctk.CTkImage(Image.open('ddlc.jpg'), size=(150,225)))
-        mvs.append(ctk.CTkImage(Image.open('toradora.jpg'), size=(150,225)))
-        mvs.append(ctk.CTkImage(Image.open('shikanokonokonokokoshitantan.jpg'), size=(150,225)))
-        #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/toradora.jpg'), size=(150,225)))
-        #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/taiga.jpg'), size=(150,225)))
-        #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/taigashutup.jpg'), size=(150,225)))
-        #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/taigashutup.jpg'), size=(150,225)))
-        #mvs.append(ctk.CTkImage(Image.open('/Users/ryanlam/Desktop/i need this/taigashutup.jpg'), size=(150,225)))
-
-        mvname = []
-
-        mvname.append("Lucky Star")
-        mvname.append("Bocchi The Rock!")
-        mvname.append("DDLC")
-        mvname.append("Toradora")
-        mvname.append("Shikanoko Nokonoko Koshitantan")
-        #mvname.append("Toradora")
-        #mvname.append("Toradora")
-        #mvname.append("Toradora")
-        #mvname.append("Toradora")
-        #mvname.append("Toradora")
-
-        thingyc = []
+        mvbuttons = []
 
         #for i in range(x, 5+x):
         #    self.label = ctk.CTkLabel(self, text="", image=tvs[i])
@@ -123,35 +123,41 @@ class App(ctk.CTkToplevel):
         #    self.btn.grid(padx=10, pady=0, column=i+1, row=3)
         #    i+=1
 
-        self.label = ctk.CTkLabel(self, text="You're Watching", fg_color="#325EE2", text_color="white", width=200, height=50, font=("Comic Sans MS", 24))
+        self.label = ctk.CTkLabel(target_frame, text="You're Watching", fg_color="#325EE2", text_color="white", width=200, height=50, font=("Comic Sans MS", 24))
         self.label.grid(padx=0, pady=10, column=0, row=0, columnspan=2)
 
-        self.btn = ctk.CTkButton(self, text="Search", command=self._opensearch, font=("Comic Sans MS", 14))
+        self.btn = ctk.CTkButton(target_frame, text="Search", command=self._opensearch, font=("Comic Sans MS", 14))
         self.btn.grid(column=3, row=1, columnspan=2)
 
-        self.btn = ctk.CTkButton(self, text="Watchlist", command=self._openwatchlist, font=("Comic Sans MS", 14))
+        self.btn = ctk.CTkButton(target_frame, text="Watchlist", command=self._openwatchlist, font=("Comic Sans MS", 14))
         self.btn.grid(column=6,row=1)
 
-        self.label = ctk.CTkLabel(self, text="Featured TV Shows", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
+        self.label = ctk.CTkLabel(target_frame, text="Featured TV Shows", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
         self.label.grid(padx=0, pady=10, column=0, row=1, columnspan=2)
 
-        for i in range(x, 5+x):
-            self.label=ctk.CTkLabel(self, text="", image=tvs[i])
+        tvname = list(tvs.keys())
+        tvimages = [details["Image"] for details in tvs.values()]
+        
+        for i in range(x, 6+x):
+            self.label=ctk.CTkLabel(target_frame, text="", image=tvimages[i])
             self.label.grid(padx=40, pady=10, column=i+1, row=2)
-            tvbuttons.append(ctk.CTkButton(self, text=tvname[i]))
+            tvbuttons.append(ctk.CTkButton(target_frame, text=tvname[i]))
             tvbuttons[i]
             tvbuttons[i].grid(padx=10, pady=0, column=i+1, row=3)
             i+=1
 
-        self.label = ctk.CTkLabel(self, text="Featured Movies", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
+        self.label = ctk.CTkLabel(target_frame, text="Featured Movies", fg_color="#718CDD", width=150, height=30, font=("Comic Sans MS", 12))
         self.label.grid(padx=0, pady=10, column=0, row=4, columnspan=2)
 
-        for i in range(x, 5+x):
-            self.label=ctk.CTkLabel(self, text="", image=mvs[i])
+        mvname = list(mvs.keys())
+        mvimages = [details["Image"] for details in tvs.values()]
+
+        for i in range(x, 6+x):
+            self.label=ctk.CTkLabel(target_frame, text="", image=mvimages[i])
             self.label.grid(padx=40, pady=10, column=i+1, row=6)
-            thingyc.append(ctk.CTkButton(self, text=mvname[i]))
-            thingyc[i]
-            thingyc[i].grid(padx=10, pady=0, column=i+1, row=7)
+            mvbuttons.append(ctk.CTkButton(target_frame, text=mvname[i]))
+            mvbuttons[i]
+            mvbuttons[i].grid(padx=10, pady=0, column=i+1, row=7)
             i+=1
 
 
@@ -167,9 +173,9 @@ class App(ctk.CTkToplevel):
         else:
             self.toplevel_window2.focus()
 
-    def _openresults(self):
+    def _openstream(self):
         if self.toplevel_window3 is None or not self.toplevel_window3.winfo_exists():
-            #self.toplevel_window3 = Search(self)
+            self.toplevel_window3 = View(self)
             pass
         else:
             self.toplevel_window3.focus()
