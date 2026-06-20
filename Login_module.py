@@ -543,5 +543,9 @@ class account_credentials():
             writer = csv.writer(file)
             for line in lines:
                 writer.writerow(line)
+        #write the change to the account subscription invoice
+        file = open(f"Subscription_invoice\\{self.username}.txt", "a")
+        file.write(f"Changed to {subscription} plan"+"\n")
+        file.close
         #update the subscription variable
         self.subscription = subscription
