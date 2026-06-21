@@ -619,9 +619,12 @@ class App(ctk.CTk):
 
         return filteredD
     
-    def dologin(self, authu, sprofileidx):
+    def dologin(self, authu, sprofileidx, profile_name): # for login module to transfer over to here
         self.current_username = authu
         self.active_profile_index = sprofileidx
+        self.active_profile_name = profile_name
+
+        print(self.active_profile_name)
         
         global Arestriction
         Arestriction = get_profile_restriction(self.current_username,self.active_profile_index)
