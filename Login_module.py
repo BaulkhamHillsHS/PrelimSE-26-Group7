@@ -232,11 +232,11 @@ class Subscription_Page(ctk.CTkFrame):
         print("okay")
         print(choice)
         if choice == "Budget":
-            self.subscription_description = "blah"
+            self.subscription_description = "Lowest streaming quality\nFor the You're streaming partakers"
         elif choice == "Basic":
-            self.subscription_description = "ok"
+            self.subscription_description = "An okay level of streaming quality and experiences\nFor the You're streaming initiated"
         elif choice == "Premium":
-            self.subscription_description = "Yippee"
+            self.subscription_description = "The highest level of streaming and video quality \nFor the You're streaming enjoyers"
         #update subscriiption description
         self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
         self.description_label.grid(row=1,column=1, sticky="ew", padx=20)
