@@ -52,12 +52,12 @@ class Login_Page(ctk.CTkFrame):
         self.username_label = ctk.CTkLabel(self, width=20, height=10, text="Username",font=("Comic Sans MS", 12), fg_color="transparent")
         self.username_label.grid(row=1, column=0, sticky="e")
         self.username_label.grid_columnconfigure((0), weight=1)
-        self.username_text = ctk.CTkEntry(self, fg_color="#718CDD", corner_radius= 0, height= 10, width= 400)
+        self.username_text = ctk.CTkEntry(self, fg_color="#718CDD", corner_radius= 0,font=("Comic Sans MS", 12), height= 10, width= 400)
         self.username_text.grid(row=1, column=1, pady=10, padx=10, sticky="ew")
         #password
         self.password_label = ctk.CTkLabel(self, width=20, height=10, text="Password",font=("Comic Sans MS", 12), fg_color="transparent")
         self.password_label.grid(row=2, column=0, sticky="e")
-        self.password_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
+        self.password_text = ctk.CTkEntry(self, width= 80, height= 20,show="*", fg_color="#718CDD",font=("Comic Sans MS", 12), corner_radius= 0)
         self.password_text.grid(row=2, column=1, sticky= "ew", pady=10, padx=10)
         #login button
         self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit",font=("Comic Sans MS", 12),  command= self.login_submission)
@@ -141,7 +141,7 @@ class Profile_Page(ctk.CTkFrame):
         self.profile_title_label = ctk.CTkLabel(self, text=f"{self.username}'s profiles", font=("Comic Sans MS", 24), fg_color="transparent")
         self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the profiles as options
-        self.profile_box = ctk.CTkComboBox(self, values=self.profiles, state="readonly", command=self.describe_profile)
+        self.profile_box = ctk.CTkComboBox(self, values=self.profiles, state="readonly",font=("Comic Sans MS", 12), command=self.describe_profile)
         #put the combobox in position
         self.profile_box.grid(row=1, column=0,)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
@@ -210,7 +210,7 @@ class Subscription_Page(ctk.CTkFrame):
         self.profile_title_label = ctk.CTkLabel(self, text=f"Subscription Plans \nExisting plan: {self.subscription} tier", font=("Comic Sans MS", 24), fg_color="transparent")
         self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the subscription plans as options
-        self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], state="readonly", command=self.describe_subscription)
+        self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], state="readonly",font=("Comic Sans MS", 12), command=self.describe_subscription)
         #put the combobox in position
         self.subscription_box.grid(row=1, column=0)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
@@ -287,7 +287,7 @@ class Payment_page(ctk.CTkFrame):
         #Payment info Pin 
         self.bank_prompt_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Payment information",font=("Comic Sans MS", 12),  fg_color="transparent")
         self.bank_prompt_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
-        self.bank_details_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
+        self.bank_details_text = ctk.CTkEntry(self, width= 80, height= 20,show="*",font=("Comic Sans MS", 12), fg_color="#718CDD", corner_radius= 0)
         self.bank_details_text.grid(row=2, sticky= "ew", pady=10, padx=10)
         #Payment button
         self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription",font=("Comic Sans MS", 12),  command=self.pay_subscription)
@@ -403,7 +403,7 @@ class Email_Send(ctk.CTkFrame):
         #Entry box to put in email
         self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password \n(through a popup)",font=("Comic Sans MS", 12),  fg_color="transparent")
         self.email_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
-        self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
+        self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0, font=("Comic Sans MS", 12))
         self.email_text.grid(row=2, sticky= "ew", pady=10, padx=10)
         #email button
         self.email_button = ctk.CTkButton(self, width= 20, height=10 , text="Find username and password",font=("Comic Sans MS", 12),  command=self.send_email)
