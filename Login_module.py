@@ -171,7 +171,7 @@ class Profile_Page(ctk.CTkFrame):
             self.profile = self.profile_box.get()
             self.profile_column = self.account.get_profile_number(self.profile)
             #give this to the front page
-            self.winfo_toplevel().master.dologin(self.username, self.profile_column)
+            self.winfo_toplevel().master.dologin(self.username, self.profile_column, self.profile)
     def open_subscription(self):
          #destroy everything in this frame
         for widget in self.winfo_children():
