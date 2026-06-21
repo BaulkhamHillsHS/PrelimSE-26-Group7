@@ -169,16 +169,9 @@ class Profile_Page(ctk.CTkFrame):
             tk.messagebox.showwarning("Unchosen profile", "You have not chosen a profile yet")
         else:
             self.profile = self.profile_box.get()
-            #get rid of the navigation panel as they go to the main page
-            self.navigation_frame.destroy()
-            #destroy everything in this frame
-            for widget in self.winfo_children():
-                widget.destroy()
-            #create instance of the home page and pass through the account, profile and profile restrictions through
-            self.homepage = Testing.Homepage(self.window, self.account, self.profile, self.allowed_content)
-            #put it on screen
-            self.homepage.grid(row=0,column=0, sticky="nsew")
-            
+            self.profile_column = self.account.get_profile_number(self.profile)
+            #give this to the front page
+            self.winfo_toplevel().master.dologin(self.username, self.profile_column, self.profile)
     def open_subscription(self):
          #destroy everything in this frame
         for widget in self.winfo_children():
@@ -508,6 +501,17 @@ class account_credentials():
                     return row[1]
         #if nothing is found notify caller
         return "None"
+    def get_profile_number(self, profile):
+        file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
+        #make it so that it doesn't read the header row for the file
+        next(file)
+        for row in file:
+            #find the specific user
+            if self.username == row[0] and self._password == row[1]:
+                for number, column in enumerate(row):
+                    #find the specific profile chosen by the user and the column it is in
+                    if profile == column:
+                        return number
     def get_profile_description(self, profile):
         file = csv.reader(open('members_profiles.csv', "r"), delimiter=",")
         #make it so that it doesn't read the header row for the file
