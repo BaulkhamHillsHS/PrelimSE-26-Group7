@@ -21,6 +21,8 @@ def get_profile_restriction(username, profile_index):
     return "None"
 
 
+
+
 RATINGS = {
 "G":2,
 "PG":2,
@@ -38,12 +40,43 @@ RATINGS = {
 
 
 class Watchlist(ctk.CTkToplevel):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, master, tv_data, mv_data, *args, **kwargs):
+        super().__init__(master, *args, **kwargs)
         self.title("Watchlist")
         self.geometry("1280x900")
         self.label = ctk.CTkLabel(self, text="Watchlist", fg_color="#6D268B", width=150, height=25)
         self.label.grid(column=1, row=1, padx=10, pady=10)
+
+        self.tv_data = tv_data
+        self.mv_data = mv_data
+
+        self.scroll_frame = ctk.CTkScrollableFrame(self, width=1200, height=750)
+        self.scroll_frame.grid(column=1, row=2, columnspan=5, padx=40, pady=20, sticky="nsew")
+        
+        self.load_watchlist()
+
+    def load_watchlist(self):
+        try:
+            profilename = getattr(self.master, "active_profile_name", "DefaultProfile")
+            filename = f"watch_lists/{profilename}.txt"
+
+            if os.path.exists(filename):
+                with open(filename, "r") as file:
+                    for line in file:
+                        title = line.strip()
+                        if title:
+                            catalog = {**self.tv_data, **self.mv_data}
+                            showinfo = catalog.get(title, {"Genre": "Unknown", "Rating": "G"})
+
+                            viewbtn = ctk.CTkButton(self.scroll_frame, text=f"> {title}", font=("Comic Sans MS", 14), anchor="w", fg_color="#325EE2", command=lambda n=title, d=showinfo: self.master.openstream(n,d))
+                            viewbtn.pack(pady=5,padx=20, fill="x")
+            else:
+                empty = ctk.CTkLabel(self.scroll_frame, text="Add some shows to your watchlist!", font=("Comic Sans MS", 16))
+                empty.pack(pady=50)
+        except Exception as e:
+            print(f"Watchlist Error {e}")
+
+
 
 
 
@@ -211,7 +244,7 @@ class View(ctk.CTkToplevel): #when you click each show to watch it
             self.screen_canvas = ctk.CTkLabel(self.player_frame, text="", image=self.info["StreamImage"])
             self.screen_canvas.grid(row=0, column=0, sticky="nsew")
         else:
-            self.screen_canvas = ctk.CTkLabel(self.player_frame, text="▶ Stream Initializing...", text_color="white", font=("Comic Sans MS", 18))
+            self.screen_canvas = ctk.CTkLabel(self.player_frame, text="> Stream Starting", text_color="white", font=("Comic Sans MS", 18))
             self.screen_canvas.grid(row=0, column=0)
 
         self.sidebar = ctk.CTkFrame(self, fg_color="#2b2b2b", width=320, corner_radius=8)
@@ -229,8 +262,26 @@ class View(ctk.CTkToplevel): #when you click each show to watch it
         )
         self.side_desc.pack(pady=20, padx=15, anchor="w")
 
-        self.add_watchlist_btn = ctk.CTkButton(self.sidebar, text="+ Add to Watchlist", fg_color="#6D268B", font=("Comic Sans MS", 13))
+        self.add_watchlist_btn = ctk.CTkButton(self.sidebar, text="+ Add to Watchlist", fg_color="#6D268B", font=("Comic Sans MS", 13), command=self.save_watchlist)
         self.add_watchlist_btn.pack(side="bottom", fill="x", padx=15, pady=20)
+
+    
+
+    def save_watchlist(self):
+        try:
+            root = self.master
+            profilename = getattr(root, "active_profile_name", "DefaultProfile")
+
+            filename = f"watch_lists/{profilename}.txt"
+            title = self.name
+
+            with open(filename, "a") as file:
+                file.write(f"{title}\n")
+            
+            print(f"Successful, '{title}', {filename}")
+            self.add_watchlist_btn.configure(text="Successfully Added", fg_color="#1AA956", state="disabled")
+        except Exception as e:
+            print(f"Error - saving watchlist: {e}")
 
 
 
@@ -266,7 +317,7 @@ class App(ctk.CTk):
 
     def _build_ui(self, target_frame):
 
-        global x
+        global x, Arestriction
         x = 0
 
 
@@ -300,7 +351,7 @@ class App(ctk.CTk):
                 },
             "Doki Doki Literature Club!" : {
                 "Image":ctk.CTkImage(Image.open("ddlc.jpg"), size=(150,225)),
-                "Rating":"M",
+                "Rating":"MA15+",
                 "Genre":"Horror",
                 "Description":"Just Monika.",
                 "StreamImage":ctk.CTkImage(Image.open("ddlc.jpg"), size=(800,450))
@@ -526,7 +577,7 @@ class App(ctk.CTk):
 
 
 
-        current_restrict = "M"
+        current_restrict = get_profile_restriction(self.current_username, int(self.active_profile_index)-1)
 
         tvs = self.filterM(dict(tvs), current_restrict)
         mvs = self.filterM(dict(mvs), current_restrict)
@@ -583,7 +634,7 @@ class App(ctk.CTk):
 
     def _openwatchlist(self):
         if self.toplevel_window is None or not self.toplevel_window.winfo_exists():
-            self.toplevel_window = Watchlist(self)
+            self.toplevel_window = Watchlist(self, tv_data=self.all_tvs, mv_data=self.all_mvs)
         else:
             self.toplevel_window.focus()
 
