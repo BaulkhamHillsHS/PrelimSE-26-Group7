@@ -2,15 +2,14 @@ import customtkinter as ctk
 import csv
 import tkinter as tk
 import Front_Page
-import Testing
-import os
-import smtplib
+from PIL import Image
 from email.message import EmailMessage
 ctk.set_appearance_mode("dark")
 ctk.set_default_color_theme("blue")
 class Login_screen(ctk.CTkToplevel):
     def __init__(self, *args):
         super().__init__()
+        self.image = Image.open("Logo.png")
         self.geometry("450x480")
         #create the UI and show it on screen
         self._build_ui()
@@ -42,25 +41,29 @@ class Login_Page(ctk.CTkFrame):
         self.grid_rowconfigure((0,4), weight=1)
         self.grid_rowconfigure((1,2), weight=8)
         self.grid_rowconfigure((3), weight=2)
+        #Logo
+        self.image = ctk.CTkImage((Image.open("Logo.png")), size=(50,50))
+        self.logo = ctk.CTkLabel(self, text="", image=self.image, corner_radius=5)
+        self.logo.grid(row=0,column=0)
         #Login Label
-        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Login", fg_color= "transparent", font=("Calibri", 24))
-        self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10, columnspan=2)
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Login", fg_color= "transparent", font=("Comic Sans MS", 24))
+        self.label.grid(row=0, column=1, sticky= "nsew", padx=10, pady=10)
         #Username
-        self.username_label = ctk.CTkLabel(self, width=20, height=10, text="Username", bg_color="green", fg_color="blue")
+        self.username_label = ctk.CTkLabel(self, width=20, height=10, text="Username",font=("Comic Sans MS", 12), fg_color="transparent")
         self.username_label.grid(row=1, column=0, sticky="e")
         self.username_label.grid_columnconfigure((0), weight=1)
-        self.username_text = ctk.CTkEntry(self, fg_color="blue", corner_radius= 0, height= 10, width= 400)
+        self.username_text = ctk.CTkEntry(self, fg_color="#718CDD", corner_radius= 0, height= 10, width= 400)
         self.username_text.grid(row=1, column=1, pady=10, padx=10, sticky="ew")
         #password
-        self.password_label = ctk.CTkLabel(self, width=20, height=10, text="Password", bg_color="green", fg_color="blue")
+        self.password_label = ctk.CTkLabel(self, width=20, height=10, text="Password",font=("Comic Sans MS", 12), fg_color="transparent")
         self.password_label.grid(row=2, column=0, sticky="e")
-        self.password_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.password_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
         self.password_text.grid(row=2, column=1, sticky= "ew", pady=10, padx=10)
         #login button
-        self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit",  command= self.login_submission)
+        self.login_button = ctk.CTkButton(self, width= 20, height=10 , text="submit",font=("Comic Sans MS", 12),  command= self.login_submission)
         self.login_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10, columnspan=2)
         #button if you forget your username and password
-        self.forgotten_button = ctk.CTkButton(self, text="Press if you have forgotten your account details", command=self.send_credentials)
+        self.forgotten_button = ctk.CTkButton(self, text="Press if you have forgotten your account details",font=("Comic Sans MS", 12),  command=self.send_credentials)
         self.forgotten_button.grid(row=4, column=0, sticky="ew", pady=10, padx=10, columnspan=2)
         #create instance of navigation frame and put it on the screen
         self.navigation_frame = Page_navigation_panel(self.window, "Login", None, self)
@@ -135,7 +138,7 @@ class Profile_Page(ctk.CTkFrame):
         #create a list of profiles from csv file
         self.profiles = self.account.profiles
         #create a title for this page
-        self.profile_title_label = ctk.CTkLabel(self, text=f"{self.username}'s profiles", font=("Calibri", 24), fg_color="transparent")
+        self.profile_title_label = ctk.CTkLabel(self, text=f"{self.username}'s profiles", font=("Comic Sans MS", 24), fg_color="transparent")
         self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the profiles as options
         self.profile_box = ctk.CTkComboBox(self, values=self.profiles, state="readonly", command=self.describe_profile)
@@ -143,14 +146,14 @@ class Profile_Page(ctk.CTkFrame):
         self.profile_box.grid(row=1, column=0,)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
         self.description = "No profile chosen yet"
-        self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
+        self.description_label = ctk.CTkLabel(self, text=self.description,font=("Comic Sans MS", 12),  fg_color="#718CDD",width=150, height=100,corner_radius=10)
         #place the description down
         self.description_label.grid(row=1,column=1,sticky='ew', padx=20)
         #Button to choose profile
-        self.submit_button = ctk.CTkButton(self, text="Choose profile", command=self.submit_profile)
+        self.submit_button = ctk.CTkButton(self, text="Choose profile",font=("Comic Sans MS", 12),  command=self.submit_profile)
         self.submit_button.grid(row=2, column=1)
         #Button to go to subscription page
-        self.subscription_page_button = ctk.CTkButton(self, text="Go to subscription page", command=self.open_subscription)
+        self.subscription_page_button = ctk.CTkButton(self, text="Go to subscription page",font=("Comic Sans MS", 12),  command=self.open_subscription)
         self.subscription_page_button.grid(row=2,column=0)
         #put in the navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
@@ -160,7 +163,7 @@ class Profile_Page(ctk.CTkFrame):
         self.description = f"You have chosen profile: {choice} \n Allowed content up to: {self.allowed_content}"
         print(self.description)
         #remake the label to update this
-        self.description_label = ctk.CTkLabel(self, text=self.description, fg_color="blue",width=150, height=100,corner_radius=10)
+        self.description_label = ctk.CTkLabel(self, text=self.description,font=("Comic Sans MS", 12),  fg_color="#718CDD",width=150, height=100,corner_radius=10)
         #place the textbox down
         self.description_label.grid(row=1,column=1, sticky="ew", padx=20)
     def submit_profile(self):
@@ -204,7 +207,7 @@ class Subscription_Page(ctk.CTkFrame):
         self.columnconfigure(1, weight=5)
         #create a title for the subscription page
         #create a title for this page
-        self.profile_title_label = ctk.CTkLabel(self, text=f"Subscription Plans \nExisting plan: {self.subscription} tier", font=("Calibri", 24), fg_color="transparent")
+        self.profile_title_label = ctk.CTkLabel(self, text=f"Subscription Plans \nExisting plan: {self.subscription} tier", font=("Comic Sans MS", 24), fg_color="transparent")
         self.profile_title_label.grid(row=0, column=0, sticky="nsew", padx=10, pady=10, columnspan=2)
         #create a combobox with the subscription plans as options
         self.subscription_box = ctk.CTkComboBox(self, values=["Budget", "Basic", "Premium"], state="readonly", command=self.describe_subscription)
@@ -212,11 +215,11 @@ class Subscription_Page(ctk.CTkFrame):
         self.subscription_box.grid(row=1, column=0)
         #Create a label to show the specifications of the profile and set details to be empty when no profile is chosen
         self.subscription_description = "Different plan not chosen yet"
-        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
+        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, font=("Comic Sans MS", 12), fg_color="#4168DE",width=150, height=100,corner_radius=10)
         #place the description down
         self.description_label.grid(row=1,column=1,sticky='ew', padx=20)
         #Button to choose subscription plan
-        self.submit_button = ctk.CTkButton(self, text="Choose plan", command=self.submit_subscription)
+        self.submit_button = ctk.CTkButton(self, text="Choose plan",font=("Comic Sans MS", 12),  command=self.submit_subscription)
         self.submit_button.grid(row=2, column=1, columnspan=2)
         #navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
@@ -231,7 +234,7 @@ class Subscription_Page(ctk.CTkFrame):
         elif choice == "Premium":
             self.subscription_description = "The highest level of streaming and video quality \nFor the You're streaming enjoyers"
         #update subscriiption description
-        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="blue",width=150, height=100,corner_radius=10)
+        self.description_label = ctk.CTkLabel(self, text=self.subscription_description, fg_color="#4168DE",width=150, height=100,corner_radius=10, font=("Comic Sans MS", 10))
         self.description_label.grid(row=1,column=1, sticky="ew", padx=20)
     def submit_subscription(self):
         #get the choice of the subscription
@@ -279,15 +282,15 @@ class Payment_page(ctk.CTkFrame):
         self.grid_rowconfigure((0,2,3), weight=2)
         self.grid_rowconfigure((1,4), weight=1)
         #Label asking for you to pay to change subscription
-        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Pay To Change Subscription", bg_color= "transparent", font=("Calibri", 24))
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Pay To Change Subscription", bg_color= "transparent", font=("Comic Sans MS", 24))
         self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10)
         #Payment info Pin 
-        self.bank_prompt_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Payment information", fg_color="transparent")
+        self.bank_prompt_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Payment information",font=("Comic Sans MS", 12),  fg_color="transparent")
         self.bank_prompt_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
-        self.bank_details_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.bank_details_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
         self.bank_details_text.grid(row=2, sticky= "ew", pady=10, padx=10)
         #Payment button
-        self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription", command=self.pay_subscription)
+        self.payment_button = ctk.CTkButton(self, width= 20, height=10 , text="Pay and Change Subscription",font=("Comic Sans MS", 12),  command=self.pay_subscription)
         self.payment_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
         #navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
@@ -339,21 +342,21 @@ class Page_navigation_panel(ctk.CTkFrame):
             pass
         if self.panel == "Profile":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page",font=("Comic Sans MS", 12),  command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", columnspan=2, pady=10, padx=10)
         elif self.panel == "Subscription":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page",font=("Comic Sans MS", 12),  command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
             #make a button to go back to the Profile page
-            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Profile Page", command=self.back_profile)
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Profile Page",font=("Comic Sans MS", 12),  command=self.back_profile)
             self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
         elif self.panel == "Payment":
             #make a button to go back to the login page
-            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page", command=self.back_login)
+            self.back_button1 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Login Page",font=("Comic Sans MS", 12),  command=self.back_login)
             self.back_button1.grid(row=1, column=0, sticky= "nsew", pady=10, padx=10)
             #make a button to go back to the Subscription page
-            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Subscription Page", command=self.back_subscription)
+            self.back_button2 = ctk.CTkButton(self, width= 20, height=10 , text="Go back to Subscription Page",font=("Comic Sans MS", 12),  command=self.back_subscription)
             self.back_button2.grid(row=1, column=1, sticky= "nsew", pady=10, padx=10)
     def back_login(self):
         #creating a instance of the login_page but have it be so that it's parent is the carried over instance of the window, so when you put it on with grid it will be placed on the grind of the window and not within this frame
@@ -395,15 +398,15 @@ class Email_Send(ctk.CTkFrame):
         self.grid_rowconfigure((0,2,3), weight=2)
         self.grid_rowconfigure((1,4), weight=1)
         #Label telling you how to get your credentials
-        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Lost user credentials", bg_color= "transparent", font=("Calibri", 24))
+        self.label = ctk.CTkLabel(self, width= 80, height= 20, text="Lost user credentials", bg_color= "transparent", font=("Comic Sans MS", 24))
         self.label.grid(row=0, column=0, sticky= "nsew", padx=10, pady=10)
         #Entry box to put in email
-        self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password \n(through a popup)", fg_color="transparent")
+        self.email_label = ctk.CTkLabel(self, width=20, height=10, text="Type in your Email address to be sent your username and password \n(through a popup)",font=("Comic Sans MS", 12),  fg_color="transparent")
         self.email_label.grid(row=1, column=0, sticky="ew", pady=10, padx=10)
-        self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="blue", corner_radius= 0)
+        self.email_text = ctk.CTkEntry(self, width= 80, height= 20, fg_color="#718CDD", corner_radius= 0)
         self.email_text.grid(row=2, sticky= "ew", pady=10, padx=10)
         #email button
-        self.email_button = ctk.CTkButton(self, width= 20, height=10 , text="Find username and password", command=self.send_email)
+        self.email_button = ctk.CTkButton(self, width= 20, height=10 , text="Find username and password",font=("Comic Sans MS", 12),  command=self.send_email)
         self.email_button.grid(row=3, column=0, sticky= "nsew", pady=10, padx=10)
         #navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
