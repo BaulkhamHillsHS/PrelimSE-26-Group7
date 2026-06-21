@@ -250,7 +250,8 @@ class App(ctk.CTk):
         self.login_window = None
         self.results_window = None
         self.toplevel_window3 = None
-        self.login = Login_module.Login_screen()
+        self.withdraw()
+        self.login = Login_module.Login_screen(self)
 
         self.current_username = "MrDunne"
         self.active_profile_index = 2
@@ -617,6 +618,21 @@ class App(ctk.CTk):
                 filteredD[name] = details
 
         return filteredD
+    
+    def dologin(self, authu, sprofileidx):
+        self.current_username = authu
+        self.active_profile_index = sprofileidx
+        
+        global Arestriction
+        Arestriction = get_profile_restriction(self.current_username,self.active_profile_index)
+
+        self.grid_rowconfigure(0, weight=1)
+        self.grid_columnconfigure(0, weight=1)
+        self.scroll_frame = ctk.CTkScrollableFrame(self)
+        self.scroll_frame.grid(row=0, column=0, sticky="nsew")
+
+        self._build_ui(self.scroll_frame)
+        self.deiconify()
 
 
 
