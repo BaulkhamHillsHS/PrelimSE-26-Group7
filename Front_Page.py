@@ -220,9 +220,9 @@ class Results(ctk.CTkToplevel):
 class View(ctk.CTkToplevel): #when you click each show to watch it
     def __init__(self, master, name, info, *args, **kwargs):
         super().__init__(master,*args,**kwargs)
+        global profile_for_watch_history
         self.name = name
         self.info = info
-
         self.title(self.name)
         self.geometry("1280x800")
         self.resizable(False,False)
@@ -230,7 +230,8 @@ class View(ctk.CTkToplevel): #when you click each show to watch it
         self.grid_columnconfigure(0, weight=3)
         self.grid_columnconfigure(1, weight=1)
         self.grid_rowconfigure(0, weight=1)
-
+        
+        self.save_watch_history()
         self._build_ui()
 
     def _build_ui(self):
@@ -282,8 +283,11 @@ class View(ctk.CTkToplevel): #when you click each show to watch it
             self.add_watchlist_btn.configure(text="Successfully Added", fg_color="#1AA956", state="disabled")
         except Exception as e:
             print(f"Error - saving watchlist: {e}")
-
-
+    def save_watch_history(self):
+        filename = f"watch_history/{profile_for_watch_history}_history.txt"
+        title = self.name
+        with open(filename, "a") as file:
+                file.write(f"Watched: {title}\n")
 
 
 
@@ -674,6 +678,8 @@ class App(ctk.CTk):
         self.current_username = authu
         self.active_profile_index = sprofileidx
         self.active_profile_name = profile_name
+        global profile_for_watch_history
+        profile_for_watch_history = profile_name
 
         print(self.active_profile_name)
         

@@ -73,7 +73,6 @@ class Login_Page(ctk.CTkFrame):
         self.username = self.username_text.get()
         #Get username that was typed in
         self.password = self.password_text.get()
-        print(f"{self.username}, {self.password}")
         #Check if the login details are correct
         verification = self.verify_login(self.username.strip(), self.password.strip())
         if verification == True:
@@ -81,7 +80,6 @@ class Login_Page(ctk.CTkFrame):
                 #destroy everything in this frame
                 for widget in self.winfo_children():
                     widget.destroy()
-                print(self.winfo_children())
                 #open up profile page when you log in, as long as it doesn't already exist
                 self._profile_page = Profile_Page(self, self.account)
                 self._profile_page.grid(row=0, column=0, sticky='nsew', columnspan=2, rowspan=5)
@@ -161,7 +159,6 @@ class Profile_Page(ctk.CTkFrame):
         #get the allowed content of the profile
         self.allowed_content = self.account.get_profile_description(choice)
         self.description = f"You have chosen profile: {choice} \n Allowed content up to: {self.allowed_content}"
-        print(self.description)
         #remake the label to update this
         self.description_label = ctk.CTkLabel(self, text=self.description,font=("Comic Sans MS", 12),  fg_color="#718CDD",width=150, height=100,corner_radius=10)
         #place the textbox down
@@ -225,8 +222,6 @@ class Subscription_Page(ctk.CTkFrame):
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def describe_subscription(self, choice):
         #give different descriptions based off of subscription chosen
-        print("okay")
-        print(choice)
         if choice == "Budget":
             self.subscription_description = "Lowest streaming quality\nFor the You're streaming partakers"
         elif choice == "Basic":
@@ -239,15 +234,6 @@ class Subscription_Page(ctk.CTkFrame):
     def submit_subscription(self):
         #get the choice of the subscription
         self.new_subscription = self.subscription_box.get()
-        #only proceed if the choice is different to the existing plan
-        if self.new_subscription == self.subscription:
-            print("You already have that subscription")
-        elif self.new_subscription == "Budget":
-            print("nice")
-        elif self.new_subscription == "Basic":
-            print("nicer")
-        elif self.new_subscription == "Premium":
-            print("nicest")
         #go to Payment subscription page if a plan is chosen and it is different from original plan
         if self.new_subscription == "":
             tk.messagebox.showwarning("Unchosen Plan", "You have not chosen a plan yet")
@@ -295,8 +281,6 @@ class Payment_page(ctk.CTkFrame):
         #navigation frame
         self.navigation_frame.grid(row=1, column=0, sticky="nsew", columnspan=2)
     def pay_subscription(self):
-        print(f"Your was {self.account.subscription}")
-        print(self.payment_info)
         #get the payment info that was typed in
         self.pin = self.bank_details_text.get()
         #also strip it
@@ -307,7 +291,6 @@ class Payment_page(ctk.CTkFrame):
             if self.account.subscription != self.subscription:
                 #change the subscription and show it to the user
                 self.account.change_subscription(self.subscription)
-                print(f"Your subscription is now {self.account.subscription}")
                 tk.messagebox.showinfo("Payment succeeded", f"Payment for the {self.account.subscription} plan has gone through")
             else:
                 tk.messagebox.showwarning("Same Plan", "You have already paid for that subscription plan")
@@ -377,11 +360,9 @@ class Page_navigation_panel(ctk.CTkFrame):
         #destroy the old frame when it is called
         self.get_rid()
     def get_rid(self):
-        print(self.old_frame.winfo_children())
          #destroy everything in the frame calling it
         for widget in self.old_frame.winfo_children():
             widget.destroy()
-        print(self.old_frame.winfo_children())
 class Email_Send(ctk.CTkFrame):
     def __init__(self, parent):
         super().__init__(parent)
@@ -525,7 +506,6 @@ class account_credentials():
                 for number, column in enumerate(row):
                     #find the specific profile chosen by the user
                     if profile == column:
-                        print(f"Yes {column} {number}")
                         #get the specific content rating (which is always down the row from the profile)
                         allowed_content = row[number + 5]
                         return allowed_content
@@ -538,8 +518,6 @@ class account_credentials():
         account_row = None
         for number, row in enumerate(lines):
             #find the specific user
-            print(self.username)
-            print(self._password)
             if self.username == row[0] and self._password == row[1]:
                 #remember the account's row
                 account_row = number
