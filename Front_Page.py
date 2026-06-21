@@ -591,8 +591,9 @@ class App(ctk.CTk):
 
         mvbuttons = []
 
-        self.label = ctk.CTkLabel(target_frame, text="You're Watching", fg_color="#325EE2", text_color="white", width=200, height=50, font=("Comic Sans MS", 24))
-        self.label.grid(padx=0, pady=10, column=0, row=0, columnspan=2)
+        self.logo_image = ctk.CTkImage((Image.open("Logo.png")), size=(100,100))
+        self.logo = ctk.CTkLabel(target_frame, text="", image=self.logo_image, corner_radius=5)
+        self.logo.grid(row=0,column=0, columnspan=2)
 
         self.btn = ctk.CTkButton(target_frame, text="Search", command=self._opensearch, font=("Comic Sans MS", 14))
         self.btn.grid(column=3, row=1, columnspan=2)
